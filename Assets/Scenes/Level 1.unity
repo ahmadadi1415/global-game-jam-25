@@ -414,7 +414,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -590,6 +590,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2084251873}
   - component: {fileID: 2084251872}
+  - component: {fileID: 2084251874}
   m_Layer: 0
   m_Name: GridManager
   m_TagString: Untagged
@@ -610,9 +611,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bubblePrefab: {fileID: 4126733864184472435, guid: 2d87c9803b6040943aa5cca430a2136a, type: 3}
+  _gap: {x: 1, y: 1}
   rows: 5
   columns: 5
-  spacing: 1.2
+  _cellSize: {x: 5, y: 5}
 --- !u!4 &2084251873
 Transform:
   m_ObjectHideFlags: 0
@@ -628,6 +630,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!156049354 &2084251874
+Grid:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2084251871}
+  m_Enabled: 1
+  m_CellSize: {x: 1, y: 1, z: 1}
+  m_CellGap: {x: 0, y: 0, z: 0}
+  m_CellLayout: 0
+  m_CellSwizzle: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
