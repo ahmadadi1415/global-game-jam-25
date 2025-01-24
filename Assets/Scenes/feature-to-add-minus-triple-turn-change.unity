@@ -609,11 +609,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff3476f9e43abb14aaabd3ed536f1dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _powerUp: 0
-  _gameState: 0
-  maxTurns: 20
-  turnsText: {fileID: 0}
-  statusText: {fileID: 0}
+  powerUp: 0
+  gameState: 0
+  sceneConfig: {fileID: 11400000, guid: e52ea696b802f9c44818e46cf4e49dca, type: 2}
 --- !u!4 &1999432463
 Transform:
   m_ObjectHideFlags: 0
