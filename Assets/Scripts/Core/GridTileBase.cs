@@ -33,6 +33,9 @@ public class GridTileBase : MonoBehaviour
 
     public void StartPop()
     {
+        // DO: Prevent popping if already popped
+        if (State == BubbleState.POPPED) return;
+
         SetState(BubbleState.POPPING);
         spriteRenderer.color = Color.red;
         LeanTween.delayedCall(0.5f, SetPopped);

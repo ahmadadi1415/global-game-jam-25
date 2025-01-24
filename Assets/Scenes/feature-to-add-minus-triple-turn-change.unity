@@ -1330,6 +1330,11 @@ MonoBehaviour:
   levels:
   - {fileID: 11400000, guid: e52ea696b802f9c44818e46cf4e49dca, type: 2}
   - {fileID: 11400000, guid: 36281758ea4dcf24086b52471b25e2ff, type: 2}
+  - {fileID: 11400000, guid: 1727c0c2b93a341469c5347bf7f92314, type: 2}
+  - {fileID: 11400000, guid: bea5d7db1cbe3c64f8a7bd9ac0d5b045, type: 2}
+  - {fileID: 11400000, guid: 91fa545d8ab9007419a5b39cdb0cb60a, type: 2}
+  - {fileID: 11400000, guid: 880117efd3e83c24e83a597ac25dda3e, type: 2}
+  - {fileID: 11400000, guid: 7a2dddadac472c949a50b7629fd01f97, type: 2}
   currentLevelIndex: 0
 --- !u!4 &825708472
 Transform:
@@ -1579,7 +1584,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.87, y: 4.59, z: -10}
+  m_LocalPosition: {x: 2.5, y: 3.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2200,8 +2205,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2084251873}
-  - component: {fileID: 2084251872}
   - component: {fileID: 2084251874}
+  - component: {fileID: 2084251872}
   m_Layer: 0
   m_Name: GridManager
   m_TagString: Untagged
@@ -2224,8 +2229,8 @@ MonoBehaviour:
   bubblePrefab: {fileID: 2011999345992901154, guid: 2d87c9803b6040943aa5cca430a2136a, type: 3}
   bubbleTiles: []
   _gap: {x: 1, y: 1}
-  rows: 10
-  columns: 10
+  height: 5
+  width: 5
   holes: []
   _cellSize: {x: 5, y: 5}
 --- !u!4 &2084251873
