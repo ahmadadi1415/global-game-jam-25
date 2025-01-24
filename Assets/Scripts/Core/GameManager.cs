@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Subscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
         EventManager.Subscribe<OnLevelLoadedMessage>(OnLevelLoaded);
-        GridManager.OnUpdateGrid += Instance_OnUpdateGrid;
+        // GridManager.OnUpdateGrid += Instance_OnUpdateGrid;
         GridManager.OnTurnEnd += Instance_OnTurnEnd;
         GridManager.OnUsePowerUp += Instance_OnUsePowerUp;
         // GridTileBase.OnGridClick += GridTileBase_OnGridClick;
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Unsubscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
         EventManager.Unsubscribe<OnLevelLoadedMessage>(OnLevelLoaded);
-        GridManager.OnUpdateGrid -= Instance_OnUpdateGrid;
+        // GridManager.OnUpdateGrid -= Instance_OnUpdateGrid;
         GridManager.OnTurnEnd -= Instance_OnTurnEnd;
         GridManager.OnUsePowerUp -= Instance_OnUsePowerUp;
         // GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
@@ -131,8 +131,8 @@ public class GameManager : MonoBehaviour
     private void Instance_OnTurnEnd()
     {
         _currentTurns--;
+        _powerUpManager.UsePowerUp(powerUp);
         SetPowerUp(PowerUpType.BASIC);
-        // Debug.Log(_currentTurns);
     }
 
     private void Instance_OnUpdateGrid()
@@ -148,7 +148,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (_powerUpManager.UsePowerUp(powerUp))
+        if (_powerUpManager.CanUsePowerUp(powerUp))
         {
             this.powerUp = powerUp;
         }

@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Level 01
   m_EditorClassIdentifier: 
   MaxTurns: 5
-  Horizontal: 1
-  Vertical: 1
-  Surround: 0
-  Cross: 0
-  Triple: 0
+  HorizontalLimit: 2
+  VerticalLimit: 1
+  SurroundLimit: 2
+  CrossLimit: 1
+  TripleLimit: 1
   Width: 5
   Height: 6
   Holes:

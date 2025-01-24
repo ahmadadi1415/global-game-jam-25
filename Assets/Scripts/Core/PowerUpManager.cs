@@ -73,6 +73,18 @@ public class PowerUpManager : MonoBehaviour
         return false;
     }
 
+    public bool CanUsePowerUp(PowerUpType powerUpType)
+    {
+        if (_powerUpCounts.ContainsKey(powerUpType))
+        {
+            (int current, int max) = _powerUpCounts[powerUpType];
+
+            return current >= 0;
+        }
+
+        return false;
+    }
+
     public int GetCurrentCount(PowerUpType powerUpType) => _powerUpCounts.ContainsKey(powerUpType) ? _powerUpCounts[powerUpType].current : 0;
     public int GetMaxLimit(PowerUpType powerUpType) => _powerUpCounts.ContainsKey(powerUpType) ? _powerUpCounts[powerUpType].max : 0;
 }
