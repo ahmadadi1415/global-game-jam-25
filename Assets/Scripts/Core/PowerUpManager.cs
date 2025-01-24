@@ -79,7 +79,7 @@ public class PowerUpManager : MonoBehaviour
         {
             (int current, int max) = _powerUpCounts[powerUpType];
 
-            return current >= 0;
+            return current > 0;
         }
 
         return false;
