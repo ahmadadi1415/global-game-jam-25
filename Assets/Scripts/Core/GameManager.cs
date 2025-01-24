@@ -115,7 +115,7 @@ public class GameManager : MonoBehaviour
 
     public SceneConfigSO GetSceneConfigSO()
     {
-        return _currentSceneConfigsSO;
+        return _currentSceneConfigSO;
     }
 }
 
