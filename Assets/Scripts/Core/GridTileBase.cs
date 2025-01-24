@@ -41,7 +41,7 @@ public class GridTileBase : MonoBehaviour
     public void SetPopped()
     {
         SetState(BubbleState.POPPED);
-        spriteRenderer.color = Color.black;
+        if (spriteRenderer != null) spriteRenderer.color = Color.black;
     }
 
     public void SetUnpopped()

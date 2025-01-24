@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
 
     private void OnBubblesChecked(OnBubblesCheckedMessage message)
     {
-        if (message.IsAllPopped)
+        if (message.IsAllPopped && _currentTurns >= 0)
         {
             gameState = GameState.WIN;
             Debug.Log("Game win");
@@ -86,8 +86,9 @@ public class GameManager : MonoBehaviour
             // DO: Continue to next levels
             EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
         }
-        else if (!message.IsAllPopped && GetTurnRemain() == 0)
+        else if (!message.IsAllPopped && _currentTurns == 0)
         {
+            Debug.Log($"Is all popped: {message.IsAllPopped}, {_currentTurns}");
             gameState = GameState.LOSE;
             Debug.Log("Game lose");
 

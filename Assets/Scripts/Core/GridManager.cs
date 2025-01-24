@@ -114,7 +114,6 @@ public class GridManager : MonoBehaviour
                 break;
         }
 
-        CheckGameState();
     }
 
     private void LateUpdate()
@@ -137,7 +136,8 @@ public class GridManager : MonoBehaviour
         foreach (GridTileBase bubble in bubbleTiles)
         {
             bubble.gameObject.SetActive(false);
-            Destroy(bubble);
+            // bubble.Destroy();
+            Destroy(bubble.gameObject);
         }
 
         bubbleTiles.Clear();
@@ -221,7 +221,7 @@ public class GridManager : MonoBehaviour
 
         foreach (GridTileBase bubble in bubbleTiles)
         {
-            if (bubble.gameObject.activeSelf)
+            if (bubble.State == BubbleState.UNPOPPED)
             {
                 isAllPopped = false;
                 break;
@@ -244,10 +244,11 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpBasic(GridTileBase bubbleToPop)
     {
-        bubbleToPop?.StartPop();
+        bubbleToPop.StartPop();
 
         // RemoveGrid(bubbleToPop);
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpVerticalLine(GridTileBase tile)
@@ -276,6 +277,7 @@ public class GridManager : MonoBehaviour
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpHorizontalLine(GridTileBase tile)
@@ -304,6 +306,7 @@ public class GridManager : MonoBehaviour
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpTripleClick(GridTileBase bubbleToPop)
@@ -319,7 +322,11 @@ public class GridManager : MonoBehaviour
 
         OnUpdateGrid?.Invoke();
 
-        if (_tripleRemain <= 0) OnTurnEnd?.Invoke();
+        if (_tripleRemain <= 0)
+        {
+            OnTurnEnd?.Invoke();
+            CheckGameState();
+        };
     }
 
     public void PowerUpCross(GridTileBase tile)
@@ -366,6 +373,7 @@ public class GridManager : MonoBehaviour
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpSurrounding(GridTileBase tile)
@@ -399,5 +407,6 @@ public class GridManager : MonoBehaviour
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 }
