@@ -6,6 +6,7 @@ public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
     public event Action OnUpdateGrid;
+    public event Action OnTurnEnd;
 
     public GridTileBase bubblePrefab; // Bubble prefab
 
@@ -17,6 +18,8 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Vector2 _cellSize;
 
     private bool _requiresGeneration = true;
+
+    private int _tripleRemain = 3;
 
     private Vector3 _cameraPositionTarget;
     private float _cameraSizeTarget;
@@ -65,22 +68,22 @@ public class GridManager : MonoBehaviour
         switch (GameManager.Instance.GetPowerUp())
         {
             case GameManager.PowerUp.Basic:
-                GridManager.Instance.PowerUpBasic(obj.GridTileBase);
+                PowerUpBasic(obj.GridTileBase);
                 break;
             case GameManager.PowerUp.Vertical:
-                GridManager.Instance.PowerUpVerticalLine(obj.GridTileBase);
+                PowerUpVerticalLine(obj.GridTileBase);
                 break;
             case GameManager.PowerUp.Horizontal:
-                GridManager.Instance.PowerUpHorizontalLine(obj.GridTileBase);
+                PowerUpHorizontalLine(obj.GridTileBase);
                 break;
             case GameManager.PowerUp.Cross:
-                GridManager.Instance.PowerUpCross(obj.GridTileBase);
+                PowerUpCross(obj.GridTileBase);
                 break;
             case GameManager.PowerUp.Surround:
-                GridManager.Instance.PowerUpSurrounding(obj.GridTileBase);
+                PowerUpSurrounding(obj.GridTileBase);
                 break;
             case GameManager.PowerUp.Triple:
-                GridManager.Instance.PowerUpTripleClick(obj.GridTileBase);
+                PowerUpTripleClick(obj.GridTileBase);
                 break;
         }
     }
@@ -152,14 +155,14 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpBasic(GridTileBase tile)
     {
-        OnUpdateGrid?.Invoke();
         RemoveGrid(tile);
+        OnUpdateGrid?.Invoke();
+        OnTurnEnd?.Invoke();
+
     }
 
     public void PowerUpVerticalLine(GridTileBase tile)
     {
-        OnUpdateGrid?.Invoke();
-
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
@@ -179,11 +182,13 @@ public class GridManager : MonoBehaviour
                 RemoveGrid(tileToRemove);
             }
         }
-}
+
+        OnUpdateGrid?.Invoke();
+        OnTurnEnd?.Invoke();
+    }
 
     public void PowerUpHorizontalLine(GridTileBase tile)
     {
-        OnUpdateGrid?.Invoke();
 
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
@@ -204,18 +209,27 @@ public class GridManager : MonoBehaviour
                 RemoveGrid(tileToRemove);
             }
         }
+
+        OnUpdateGrid?.Invoke();
+        OnTurnEnd?.Invoke();
     }
 
     public void PowerUpTripleClick(GridTileBase tile)
     {
+        if(_tripleRemain > 0)
+        {
+            _tripleRemain--;
+            RemoveGrid(tile);
+            OnUpdateGrid?.Invoke();
+        }
+
         OnUpdateGrid?.Invoke();
 
+        if (_tripleRemain <= 0) OnTurnEnd?.Invoke();
     }
 
     public void PowerUpCross(GridTileBase tile)
     {
-        OnUpdateGrid?.Invoke();
-
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
@@ -252,12 +266,13 @@ public class GridManager : MonoBehaviour
                 RemoveGrid(tileToRemove);
             }
         }
+
+        OnUpdateGrid?.Invoke();
+        OnTurnEnd?.Invoke();
     }
 
     public void PowerUpSurrounding(GridTileBase tile)
     {
-        OnUpdateGrid?.Invoke();
-
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
@@ -283,5 +298,8 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        OnUpdateGrid?.Invoke();
+        OnTurnEnd?.Invoke();
     }
 }

@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public event Action OnLoseGame;
+    public event Action OnWinGame;
 
     [Serializable]
     public enum GameState { Start, Lose, Win };
@@ -17,12 +19,9 @@ public class GameManager : MonoBehaviour
     public PowerUp powerUp;
     public GameState gameState;
 
-    //public Text turnsText; // UI Text to display remaining turns
-    //public Text statusText; // UI Text to display game status
-
     public SceneConfigSO sceneConfig;
 
-    private int _currentTurns;
+    private int _currentTurns = 0;
 
     private void Awake()
     {
@@ -33,12 +32,44 @@ public class GameManager : MonoBehaviour
     {
         _currentTurns = sceneConfig.MaxTurns;
         GridManager.Instance.OnUpdateGrid += Instance_OnUpdateGrid;
-        UpdateUI();
+        GridManager.Instance.OnTurnEnd += Instance_OnTurnEnd;
+        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+        OnWinGame += GameManager_OnWinGame;
+        OnLoseGame += GameManager_OnLoseGame;
+    }
+
+    private void GameManager_OnLoseGame()
+    {
+        Debug.Log("Lose");
+    }
+
+    private void GameManager_OnWinGame()
+    {
+        Debug.Log("Winner");
+    }
+
+    private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
+    {
+        if (_currentTurns == 1 && GridManager.Instance.tiles.Count > 0 )
+        {
+            OnLoseGame?.Invoke();
+        }
+
+        if(_currentTurns >= 1 && GridManager.Instance.tiles.Count == 0)
+        {
+            OnWinGame?.Invoke();
+        }
+    }
+
+    private void Instance_OnTurnEnd()
+    {
+        _currentTurns--;
+        Debug.Log(_currentTurns);
     }
 
     private void Instance_OnUpdateGrid()
     {
-        BubbleDestroyed();
+
     }
 
     public void SetPowerUp(PowerUp powerUp)
@@ -64,39 +95,6 @@ public class GameManager : MonoBehaviour
     public int GetTurnRemain()
     {
         return _currentTurns;
-    }
-    public void BubbleDestroyed()
-    {
-        _currentTurns--;
-        CheckGameStatus();
-        UpdateUI();
-    }
-
-    void CheckGameStatus()
-    {
-        if (GridManager.Instance.tiles.Count == 0 && _currentTurns > 0)
-        {
-            //statusText.text = "You Win!";
-            EndGame();
-        }
-        else if (_currentTurns <= 0)
-        {
-            //statusText.text = "You Lose!";
-            EndGame();
-        }
-    }
-
-    void UpdateUI()
-    {
-        //turnsText.text = $"Turns: {currentTurns}";
-
-
-        // add rest
-    }
-
-    void EndGame()
-    {
-        
     }
 }
 
