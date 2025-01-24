@@ -83,17 +83,16 @@ public class GameManager : MonoBehaviour
             gameState = GameState.WIN;
             Debug.Log("Game win");
 
-            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
-
             // DO: Continue to next levels
+            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
         }
         else if (!message.IsAllPopped && GetTurnRemain() == 0)
         {
             gameState = GameState.LOSE;
             Debug.Log("Game lose");
 
-            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
             // DO: Restart the level
+            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
         }
         else
         {
