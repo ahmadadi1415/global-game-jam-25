@@ -662,8 +662,8 @@ MonoBehaviour:
   bubblePrefab: {fileID: 2011999345992901154, guid: 2d87c9803b6040943aa5cca430a2136a, type: 3}
   tiles: []
   _gap: {x: 1, y: 1}
-  rows: 5
-  columns: 5
+  rows: 10
+  columns: 10
   _cellSize: {x: 5, y: 5}
 --- !u!4 &2084251873
 Transform:

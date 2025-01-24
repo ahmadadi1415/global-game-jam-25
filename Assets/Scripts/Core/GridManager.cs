@@ -134,12 +134,50 @@ public class GridManager : MonoBehaviour
     {
         OnUpdateGrid?.Invoke();
 
-    }
+        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
+
+        for (int y = 0; y < rows; y++)
+        {
+            Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
+
+            GridTileBase tileToRemove = tiles.Find(t =>
+            {
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                return tileGridPosition == checkCoord;
+            });
+
+            if (tileToRemove != null)
+            {
+                tiles.Remove(tileToRemove);
+                RemoveGrid(tileToRemove);
+            }
+        }
+}
 
     public void PowerUpHorizontalLine(GridTileBase tile)
     {
         OnUpdateGrid?.Invoke();
 
+        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
+
+        for (int x = 0; x < columns; x++)
+        {
+            Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
+
+            GridTileBase tileToRemove = tiles.Find(t =>
+            {
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                return tileGridPosition == checkCoord;
+            });
+
+            if (tileToRemove != null)
+            {
+                tiles.Remove(tileToRemove);
+                RemoveGrid(tileToRemove);
+            }
+        }
     }
 
     public void PowerUpTripleClick(GridTileBase tile)
@@ -152,11 +190,72 @@ public class GridManager : MonoBehaviour
     {
         OnUpdateGrid?.Invoke();
 
+        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
+
+        for (int y = 0; y < rows; y++)
+        {
+            Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
+
+            GridTileBase tileToRemove = tiles.Find(t =>
+            {
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                return tileGridPosition == checkCoord;
+            });
+
+            if (tileToRemove != null)
+            {
+                tiles.Remove(tileToRemove);
+                RemoveGrid(tileToRemove);
+            }
+        }
+
+        for (int x = 0; x < columns; x++)
+        {
+            Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
+
+            GridTileBase tileToRemove = tiles.Find(t =>
+            {
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                return tileGridPosition == checkCoord;
+            });
+
+            if (tileToRemove != null)
+            {
+                tiles.Remove(tileToRemove);
+                RemoveGrid(tileToRemove);
+            }
+        }
     }
 
     public void PowerUpSurrounding(GridTileBase tile)
     {
         OnUpdateGrid?.Invoke();
 
+        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
+
+        for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
+        {
+            for (int colOffset = -1; colOffset <= 1; colOffset++)
+            {
+                Vector3Int checkCoord = new Vector3Int(tileCoord.x + colOffset, tileCoord.y + rowOffset, 0);
+
+                if (checkCoord.x >= 0 && checkCoord.x < columns && checkCoord.y >= 0 && checkCoord.y < rows)
+                {
+                    GridTileBase tileToRemove = tiles.Find(t =>
+                    {
+                        Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                        return tileGridPosition == checkCoord;
+                    });
+
+                    if (tileToRemove != null)
+                    {
+                        tiles.Remove(tileToRemove);
+                        RemoveGrid(tileToRemove);
+                    }
+                }
+            }
+        }
     }
 }
