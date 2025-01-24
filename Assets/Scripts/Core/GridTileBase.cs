@@ -29,6 +29,7 @@ public class GridTileBase : MonoBehaviour, IDisposable
     public void Destroy()
     {
         // Debug.Log("Destryo" + GetPositionTile().ToString());
+        gameObject.SetActive(false);
         Destroy(gameObject);
     }
 

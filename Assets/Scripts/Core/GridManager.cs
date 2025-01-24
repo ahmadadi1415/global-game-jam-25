@@ -7,6 +7,7 @@ public class GridManager : MonoBehaviour
     public static GridManager Instance;
     public static event Action OnUpdateGrid;
     public static event Action OnTurnEnd;
+    public static event Action OnGameStateChecked;
     public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
     public class OnUsePowerUpEvent
     {
@@ -15,7 +16,7 @@ public class GridManager : MonoBehaviour
 
     public GridTileBase bubblePrefab; // Bubble prefab
 
-    public List<GridTileBase> tiles = new List<GridTileBase>();
+    public List<GridTileBase> bubbleTiles = new List<GridTileBase>();
 
     [SerializeField] private Vector2 _gap = new Vector2(1f, 1f);
     [SerializeField] private int rows = 5; // Number of rows
@@ -65,42 +66,52 @@ public class GridManager : MonoBehaviour
 
     private void OnEnable()
     {
+        EventManager.Subscribe<OnLevelLoadedMessage>(OnLevelLoaded);
         GridTileBase.OnGridClick += GridTileBase_OnGridClick;
     }
 
     private void OnDisable()
     {
+        EventManager.Unsubscribe<OnLevelLoadedMessage>(OnLevelLoaded);
         GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+    }
+
+    private void OnLevelLoaded(OnLevelLoadedMessage message)
+    {
+        // DO: Update the grids
+        GenerateGrid(message.Level);
     }
 
     private void Start()
     {
-        GenerateGrid();
+        // GenerateGrid(GameManager.Instance.sceneConfig);
     }
 
     private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
     {
         switch (GameManager.Instance.GetPowerUp())
         {
-            case PowerUp.Basic:
+            case PowerUp.BASIC:
                 PowerUpBasic(obj.GridTileBase);
                 break;
-            case PowerUp.Vertical:
+            case PowerUp.VERTICAL:
                 PowerUpVerticalLine(obj.GridTileBase);
                 break;
-            case PowerUp.Horizontal:
+            case PowerUp.HORIZONTAL:
                 PowerUpHorizontalLine(obj.GridTileBase);
                 break;
-            case PowerUp.Cross:
+            case PowerUp.CROSS:
                 PowerUpCross(obj.GridTileBase);
                 break;
-            case PowerUp.Surround:
+            case PowerUp.SURROUND:
                 PowerUpSurrounding(obj.GridTileBase);
                 break;
-            case PowerUp.Triple:
+            case PowerUp.TRIPLE:
                 PowerUpTripleClick(obj.GridTileBase);
                 break;
         }
+
+        CheckGameState();
     }
 
     private void LateUpdate()
@@ -111,27 +122,29 @@ public class GridManager : MonoBehaviour
             _requiresGeneration = true;
         }
 
-        if (_requiresGeneration) GenerateGrid();
+        if (_requiresGeneration) GenerateGrid(LevelManager.CurrentLevel);
 
         //     _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, _cameraPositionTarget, ref _moveVel, 0.8f);
         // _cam.orthographicSize = Mathf.SmoothDamp(_cam.orthographicSize, _cameraSizeTarget, ref _cameraSizeVel, 0.8f);
     }
 
-    void GenerateGrid()
+    void GenerateGrid(SceneConfigSO level)
     {
         // DO: Reset tiles
-        foreach (var tile in tiles)
+        foreach (GridTileBase bubble in bubbleTiles)
         {
-            tile.gameObject.SetActive(false);
-            Destroy(tile);
+            bubble.gameObject.SetActive(false);
+            Destroy(bubble);
         }
 
-        tiles.Clear();
+        bubbleTiles.Clear();
 
-        List<Vector3Int> coordinates = new List<Vector3Int>();
-        columns = GameManager.Instance.GetSceneConfigSO().Width;
-        rows = GameManager.Instance.GetSceneConfigSO().Height;
-        holes = GameManager.Instance.GetSceneConfigSO().Holes;
+        List<Vector3Int> coordinates = new();
+        columns = level.Width;
+        rows = level.Height;
+        holes = level.Holes;
+
+        Debug.Log($"{columns}, {rows}");
 
         for (int row = 0; row < rows; row++)
         {
@@ -159,7 +172,7 @@ public class GridManager : MonoBehaviour
             spawned.Init(coord);
             spawned.gameObject.SetActive(!isHole);
 
-            tiles.Add(spawned);
+            bubbleTiles.Add(spawned);
             bound.Encapsulate(position);
         }
 
@@ -172,6 +185,33 @@ public class GridManager : MonoBehaviour
     {
         OnUpdateGrid?.Invoke();
         gridTileBase.Destroy();
+    }
+
+    public void CheckGameState()
+    {
+        // DO: Notify game manager to win the game and continue to next level
+        EventManager.Publish<OnBubblesCheckedMessage>(new() { IsAllPopped = IsAllBubblePopped() });
+    }
+
+    public bool IsAllBubblePopped()
+    {
+        bool isAllPopped = true;
+
+        if (bubbleTiles.Count <= 0)
+        {
+            return isAllPopped;
+        }
+
+        foreach (GridTileBase bubble in bubbleTiles)
+        {
+            if (bubble.gameObject.activeSelf)
+            {
+                isAllPopped = false;
+                break;
+            }
+        }
+
+        return isAllPopped;
     }
 
     private void SetCamera(Bounds bounds)
@@ -200,7 +240,7 @@ public class GridManager : MonoBehaviour
         {
             Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase tileToRemove = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
@@ -208,7 +248,7 @@ public class GridManager : MonoBehaviour
 
             if (tileToRemove != null)
             {
-                tiles.Remove(tileToRemove);
+                bubbleTiles.Remove(tileToRemove);
                 RemoveGrid(tileToRemove);
             }
         }
@@ -227,7 +267,7 @@ public class GridManager : MonoBehaviour
         {
             Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase tileToRemove = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
@@ -235,7 +275,7 @@ public class GridManager : MonoBehaviour
 
             if (tileToRemove != null)
             {
-                tiles.Remove(tileToRemove);
+                bubbleTiles.Remove(tileToRemove);
                 RemoveGrid(tileToRemove);
             }
         }
@@ -267,7 +307,7 @@ public class GridManager : MonoBehaviour
         {
             Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase tileToRemove = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
@@ -275,7 +315,7 @@ public class GridManager : MonoBehaviour
 
             if (tileToRemove != null)
             {
-                tiles.Remove(tileToRemove);
+                bubbleTiles.Remove(tileToRemove);
                 RemoveGrid(tileToRemove);
             }
         }
@@ -284,7 +324,7 @@ public class GridManager : MonoBehaviour
         {
             Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase tileToRemove = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
@@ -292,7 +332,7 @@ public class GridManager : MonoBehaviour
 
             if (tileToRemove != null)
             {
-                tiles.Remove(tileToRemove);
+                bubbleTiles.Remove(tileToRemove);
                 RemoveGrid(tileToRemove);
             }
         }
@@ -314,7 +354,7 @@ public class GridManager : MonoBehaviour
 
                 if (checkCoord.x >= 0 && checkCoord.x < columns && checkCoord.y >= 0 && checkCoord.y < rows)
                 {
-                    GridTileBase tileToRemove = tiles.Find(t =>
+                    GridTileBase tileToRemove = bubbleTiles.Find(t =>
                     {
                         Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                         return tileGridPosition == checkCoord;
@@ -322,7 +362,7 @@ public class GridManager : MonoBehaviour
 
                     if (tileToRemove != null)
                     {
-                        tiles.Remove(tileToRemove);
+                        bubbleTiles.Remove(tileToRemove);
                         RemoveGrid(tileToRemove);
                     }
                 }

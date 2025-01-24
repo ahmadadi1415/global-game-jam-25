@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 
-public enum GameState { Start, Lose, Win };
-public enum PowerUp { Basic, Vertical, Horizontal, Cross, Surround, Triple };
+public enum GameState { START, PLAYING, LOSE, WIN };
+public enum PowerUp { BASIC, VERTICAL, HORIZONTAL, CROSS, SURROUND, TRIPLE };
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -15,7 +16,10 @@ public class GameManager : MonoBehaviour
     public SceneConfigSO sceneConfig;
     private SceneConfigSO _currentSceneConfigSO;
 
-    private int _currentTurns = 0;
+    [SerializeField] private int _currentTurns = 0;
+    [SerializeField] private int _maxTurns = 0;
+
+    [SerializeField] private GridManager _gridManager;
 
     private void Awake()
     {
@@ -30,29 +34,69 @@ public class GameManager : MonoBehaviour
             if (sceneConfig != null)
             {
                 _currentSceneConfigSO = sceneConfig;
-                _currentTurns = _currentSceneConfigSO.MaxTurns;
+                UpdateGameData(_currentSceneConfigSO);
             }
         }
     }
 
+    private void UpdateGameData(SceneConfigSO level)
+    {
+        _currentTurns = level.MaxTurns;
+        _maxTurns = level.MaxTurns;
+    }
+
     private void OnEnable()
     {
+        EventManager.Subscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
+        EventManager.Subscribe<OnLevelLoadedMessage>(OnLevelLoaded);
         GridManager.OnUpdateGrid += Instance_OnUpdateGrid;
         GridManager.OnTurnEnd += Instance_OnTurnEnd;
         GridManager.OnUsePowerUp += Instance_OnUsePowerUp;
-        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
-        OnWinGame += GameManager_OnWinGame;
-        OnLoseGame += GameManager_OnLoseGame;
+        // GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+        // OnWinGame += GameManager_OnWinGame;
+        // OnLoseGame += GameManager_OnLoseGame;
     }
 
     private void OnDisable()
     {
+        EventManager.Unsubscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
+        EventManager.Unsubscribe<OnLevelLoadedMessage>(OnLevelLoaded);
         GridManager.OnUpdateGrid -= Instance_OnUpdateGrid;
         GridManager.OnTurnEnd -= Instance_OnTurnEnd;
         GridManager.OnUsePowerUp -= Instance_OnUsePowerUp;
-        GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
-        OnWinGame -= GameManager_OnWinGame;
-        OnLoseGame -= GameManager_OnLoseGame;
+        // GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+        // OnWinGame -= GameManager_OnWinGame;
+        // OnLoseGame -= GameManager_OnLoseGame;
+    }
+
+    private void OnLevelLoaded(OnLevelLoadedMessage message)
+    {
+        UpdateGameData(message.Level);
+    }
+
+    private void OnBubblesChecked(OnBubblesCheckedMessage message)
+    {
+        if (message.IsAllPopped)
+        {
+            gameState = GameState.WIN;
+            Debug.Log("Game win");
+
+            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
+
+            // DO: Continue to next levels
+        }
+        else if (!message.IsAllPopped && GetTurnRemain() == 0)
+        {
+            gameState = GameState.LOSE;
+            Debug.Log("Game lose");
+
+            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
+            // DO: Restart the level
+        }
+        else
+        {
+            gameState = GameState.PLAYING;
+        }
     }
 
     private void Instance_OnUsePowerUp(GridManager.OnUsePowerUpEvent obj)
@@ -72,12 +116,12 @@ public class GameManager : MonoBehaviour
 
     private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
     {
-        if (_currentTurns == 1 && GridManager.Instance.tiles.Count > 0)
+        if (_currentTurns == 1 && GridManager.Instance.bubbleTiles.Count > 0)
         {
             OnLoseGame?.Invoke();
         }
 
-        if (_currentTurns >= 1 && GridManager.Instance.tiles.Count == 0)
+        if (_currentTurns >= 1 && GridManager.Instance.bubbleTiles.Count == 0)
         {
             OnWinGame?.Invoke();
         }
@@ -86,13 +130,13 @@ public class GameManager : MonoBehaviour
     private void Instance_OnTurnEnd()
     {
         _currentTurns--;
-        SetPowerUp(PowerUp.Basic);
-        Debug.Log(_currentTurns);
+        SetPowerUp(PowerUp.BASIC);
+        // Debug.Log(_currentTurns);
     }
 
     private void Instance_OnUpdateGrid()
     {
-        Debug.Log("Test");
+        Debug.Log("Grid updated");
     }
 
     public void SetPowerUp(PowerUp powerUp)

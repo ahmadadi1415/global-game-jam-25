@@ -1298,6 +1298,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 743897778}
   m_CullTransparentMesh: 1
+--- !u!1 &825708470
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 825708472}
+  - component: {fileID: 825708471}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &825708471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825708470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4b22e6c9e652ab4c97af08e00cad645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levels:
+  - {fileID: 11400000, guid: e52ea696b802f9c44818e46cf4e49dca, type: 2}
+  - {fileID: 11400000, guid: 36281758ea4dcf24086b52471b25e2ff, type: 2}
+  currentLevelIndex: 0
+--- !u!4 &825708472
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825708470}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &946252412
 GameObject:
   m_ObjectHideFlags: 0
@@ -2080,6 +2128,9 @@ MonoBehaviour:
   powerUp: 0
   gameState: 0
   sceneConfig: {fileID: 11400000, guid: e52ea696b802f9c44818e46cf4e49dca, type: 2}
+  _currentTurns: 0
+  _maxTurns: 0
+  _gridManager: {fileID: 2084251872}
 --- !u!4 &1999432463
 Transform:
   m_ObjectHideFlags: 0
@@ -2126,10 +2177,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bubblePrefab: {fileID: 2011999345992901154, guid: 2d87c9803b6040943aa5cca430a2136a, type: 3}
-  tiles: []
+  bubbleTiles: []
   _gap: {x: 1, y: 1}
   rows: 10
   columns: 10
+  holes: []
   _cellSize: {x: 5, y: 5}
 --- !u!4 &2084251873
 Transform:
@@ -2168,3 +2220,4 @@ SceneRoots:
   - {fileID: 2084251873}
   - {fileID: 1999432463}
   - {fileID: 1949714273}
+  - {fileID: 825708472}
