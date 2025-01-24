@@ -69,8 +69,8 @@ public class GridManager : MonoBehaviour
 
         if (_requiresGeneration) GenerateGrid();
 
-            _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, _cameraPositionTarget, ref _moveVel, 0.8f);
-        _cam.orthographicSize = Mathf.SmoothDamp(_cam.orthographicSize, _cameraSizeTarget, ref _cameraSizeVel, 0.8f);
+        //     _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, _cameraPositionTarget, ref _moveVel, 0.8f);
+        // _cam.orthographicSize = Mathf.SmoothDamp(_cam.orthographicSize, _cameraSizeTarget, ref _cameraSizeVel, 0.8f);
     }
 
     void GenerateGrid()
@@ -102,7 +102,7 @@ public class GridManager : MonoBehaviour
             bound.Encapsulate(position);
         }
 
-        SetCamera(bound);
+        // SetCamera(bound);
 
         _requiresGeneration = false;
     }

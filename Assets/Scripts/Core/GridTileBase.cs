@@ -23,7 +23,7 @@ public class GridTileBase : MonoBehaviour
 
     public void Destroy()
     {
-        Debug.Log("Destryo" + GetPositionTile().ToString());
+        // Debug.Log("Destryo" + GetPositionTile().ToString());
         Destroy(gameObject);
     }
 
