@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
     private void Instance_OnTurnEnd()
     {
         _currentTurns--;
+        SetPowerUp(PowerUp.Basic);
         Debug.Log(_currentTurns);
     }
 
