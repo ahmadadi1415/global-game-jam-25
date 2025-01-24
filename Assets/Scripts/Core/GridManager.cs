@@ -119,9 +119,18 @@ public class GridManager : MonoBehaviour
 
     void GenerateGrid()
     {
-        var coordinates = new List<Vector3Int>();
-        rows = GameManager.Instance.GetSceneConfigSO().Width;
-        columns = GameManager.Instance.GetSceneConfigSO().Height;
+        // DO: Reset tiles
+        foreach (var tile in tiles)
+        {
+            tile.gameObject.SetActive(false);
+            Destroy(tile);
+        }
+
+        tiles.Clear();
+
+        List<Vector3Int> coordinates = new List<Vector3Int>();
+        columns = GameManager.Instance.GetSceneConfigSO().Width;
+        rows = GameManager.Instance.GetSceneConfigSO().Height;
         holes = GameManager.Instance.GetSceneConfigSO().Holes;
 
         for (int row = 0; row < rows; row++)
@@ -143,11 +152,13 @@ public class GridManager : MonoBehaviour
         foreach (Vector3Int coord in coordinates)
         {
             bool isHole = holes.Contains((Vector2Int)coord);
-            if (isHole) continue;
 
             Vector3 position = _grid.GetCellCenterWorld(coord);
+
             GridTileBase spawned = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
             spawned.Init(coord);
+            spawned.gameObject.SetActive(!isHole);
+
             tiles.Add(spawned);
             bound.Encapsulate(position);
         }
@@ -177,7 +188,6 @@ public class GridManager : MonoBehaviour
     public void PowerUpBasic(GridTileBase tile)
     {
         RemoveGrid(tile);
-        OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
     }
 

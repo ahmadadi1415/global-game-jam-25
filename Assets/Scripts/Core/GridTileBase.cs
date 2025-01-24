@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GridTileBase : MonoBehaviour, IDisposable
 {
     public static event Action<OnGridClickEvent> OnGridClick;
-    public class OnGridClickEvent
+    public struct OnGridClickEvent
     {
         public GridTileBase GridTileBase;
     }
