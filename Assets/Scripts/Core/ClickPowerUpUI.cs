@@ -7,11 +7,11 @@ using UnityEngine.UI;
 public class ClickPowerUpUI : MonoBehaviour
 {
     private Button _button;
-    [SerializeField] private GameManager.PowerUp powerUp;
-    public event Action OnClickPowerUpUI;
+    [SerializeField] private PowerUp powerUp;
+    public static event Action OnClickPowerUpUI;
     public class OnClickPowerUIEvent
     {
-        public GameManager.PowerUp powerUp;
+        public PowerUp powerUp;
     }
 
     private void Awake()

@@ -1,21 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.UI;
 
+public enum GameState { Start, Lose, Win };
+public enum PowerUp { Basic, Vertical, Horizontal, Cross, Surround, Triple };
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    public event Action OnLoseGame;
-    public event Action OnWinGame;
-
-    [Serializable]
-    public enum GameState { Start, Lose, Win };
-    [Serializable]
-    public enum PowerUp { Basic, Vertical, Horizontal, Cross, Surround, Triple };
+    public static event Action OnLoseGame;
+    public static event Action OnWinGame;
 
     public PowerUp powerUp;
     public GameState gameState;
@@ -29,28 +21,43 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
 
-        if(sceneConfig == null) { Debug.LogError("Please add Scene Config Scriptable Object To Game Manager"); }
+        if (sceneConfig == null)
+        {
+            Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
+        }
+        else
+        {
+            if (sceneConfig != null)
+            {
+                _currentSceneConfigSO = sceneConfig;
+                _currentTurns = _currentSceneConfigSO.MaxTurns;
+            }
+        }
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        if (sceneConfig != null)
-        {
-            _currentSceneConfigSO = sceneConfig;
-            _currentTurns = _currentSceneConfigSO.MaxTurns;
-        }
-
-        GridManager.Instance.OnUpdateGrid += Instance_OnUpdateGrid;
-        GridManager.Instance.OnTurnEnd += Instance_OnTurnEnd;
-        GridManager.Instance.OnUsePowerUp += Instance_OnUsePowerUp;
+        GridManager.OnUpdateGrid += Instance_OnUpdateGrid;
+        GridManager.OnTurnEnd += Instance_OnTurnEnd;
+        GridManager.OnUsePowerUp += Instance_OnUsePowerUp;
         GridTileBase.OnGridClick += GridTileBase_OnGridClick;
         OnWinGame += GameManager_OnWinGame;
         OnLoseGame += GameManager_OnLoseGame;
     }
 
+    private void OnDisable()
+    {
+        GridManager.OnUpdateGrid -= Instance_OnUpdateGrid;
+        GridManager.OnTurnEnd -= Instance_OnTurnEnd;
+        GridManager.OnUsePowerUp -= Instance_OnUsePowerUp;
+        GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+        OnWinGame -= GameManager_OnWinGame;
+        OnLoseGame -= GameManager_OnLoseGame;
+    }
+
     private void Instance_OnUsePowerUp(GridManager.OnUsePowerUpEvent obj)
     {
-       // set based on ui later
+        // set based on ui later
     }
 
     private void GameManager_OnLoseGame()
@@ -65,12 +72,12 @@ public class GameManager : MonoBehaviour
 
     private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
     {
-        if (_currentTurns == 1 && GridManager.Instance.tiles.Count > 0 )
+        if (_currentTurns == 1 && GridManager.Instance.tiles.Count > 0)
         {
             OnLoseGame?.Invoke();
         }
 
-        if(_currentTurns >= 1 && GridManager.Instance.tiles.Count == 0)
+        if (_currentTurns >= 1 && GridManager.Instance.tiles.Count == 0)
         {
             OnWinGame?.Invoke();
         }
@@ -85,7 +92,7 @@ public class GameManager : MonoBehaviour
 
     private void Instance_OnUpdateGrid()
     {
-
+        Debug.Log("Test");
     }
 
     public void SetPowerUp(PowerUp powerUp)

@@ -5,12 +5,12 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
-    public event Action OnUpdateGrid;
-    public event Action OnTurnEnd;
-    public event Action<OnUsePowerUpEvent> OnUsePowerUp;
+    public static event Action OnUpdateGrid;
+    public static event Action OnTurnEnd;
+    public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
     public class OnUsePowerUpEvent
     {
-        public GameManager.PowerUp powerUp;
+        public PowerUp powerUp;
     }
 
     public GridTileBase bubblePrefab; // Bubble prefab
@@ -20,6 +20,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Vector2 _gap = new Vector2(1f, 1f);
     [SerializeField] private int rows = 5; // Number of rows
     [SerializeField] private int columns = 5; // Number of columns
+    [SerializeField] private List<Vector2Int> holes = new();
     [SerializeField] private Vector2 _cellSize;
 
     private bool _requiresGeneration = true;
@@ -43,18 +44,18 @@ public class GridManager : MonoBehaviour
         _grid = GetComponent<Grid>();
         _currentGap = _gap;
 
-        _grid.cellSize.Set(_cellSize.x,_cellSize.y,0); 
+        _grid.cellSize.Set(_cellSize.x, _cellSize.y, 0);
         _grid.cellGap = _currentGap;
         _grid.cellLayout = GridLayout.CellLayout.Rectangle;
 
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
-        } else
+        }
+        else
         {
             Destroy(this);
         }
-
     }
 
     private void OnValidate()
@@ -62,32 +63,41 @@ public class GridManager : MonoBehaviour
         _requiresGeneration = true;
     }
 
+    private void OnEnable()
+    {
+        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+    }
+
+    private void OnDisable()
+    {
+        GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+    }
+
     private void Start()
     {
         GenerateGrid();
-        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
     }
 
     private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
     {
         switch (GameManager.Instance.GetPowerUp())
         {
-            case GameManager.PowerUp.Basic:
+            case PowerUp.Basic:
                 PowerUpBasic(obj.GridTileBase);
                 break;
-            case GameManager.PowerUp.Vertical:
+            case PowerUp.Vertical:
                 PowerUpVerticalLine(obj.GridTileBase);
                 break;
-            case GameManager.PowerUp.Horizontal:
+            case PowerUp.Horizontal:
                 PowerUpHorizontalLine(obj.GridTileBase);
                 break;
-            case GameManager.PowerUp.Cross:
+            case PowerUp.Cross:
                 PowerUpCross(obj.GridTileBase);
                 break;
-            case GameManager.PowerUp.Surround:
+            case PowerUp.Surround:
                 PowerUpSurrounding(obj.GridTileBase);
                 break;
-            case GameManager.PowerUp.Triple:
+            case PowerUp.Triple:
                 PowerUpTripleClick(obj.GridTileBase);
                 break;
         }
@@ -110,6 +120,9 @@ public class GridManager : MonoBehaviour
     void GenerateGrid()
     {
         var coordinates = new List<Vector3Int>();
+        rows = GameManager.Instance.GetSceneConfigSO().Width;
+        columns = GameManager.Instance.GetSceneConfigSO().Height;
+        holes = GameManager.Instance.GetSceneConfigSO().Holes;
 
         for (int row = 0; row < rows; row++)
         {
@@ -119,17 +132,20 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        var bound = new Bounds();
+        Bounds bound = new();
 
         if (coordinates.Count > 0)
         {
-            var firstPosition = _grid.GetCellCenterWorld(coordinates[0]);
+            Vector3 firstPosition = _grid.GetCellCenterWorld(coordinates[0]);
             bound = new Bounds(firstPosition, Vector3.zero);
         }
 
-        foreach (var coord in coordinates)
+        foreach (Vector3Int coord in coordinates)
         {
-            var position = _grid.GetCellCenterWorld(coord);
+            bool isHole = holes.Contains((Vector2Int)coord);
+            if (isHole) continue;
+
+            Vector3 position = _grid.GetCellCenterWorld(coord);
             GridTileBase spawned = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
             spawned.Init(coord);
             tiles.Add(spawned);
@@ -220,7 +236,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpTripleClick(GridTileBase tile)
     {
-        if(_tripleRemain > 0)
+        if (_tripleRemain > 0)
         {
             _tripleRemain--;
             RemoveGrid(tile);
