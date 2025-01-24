@@ -7,6 +7,11 @@ public class GridManager : MonoBehaviour
     public static GridManager Instance;
     public event Action OnUpdateGrid;
     public event Action OnTurnEnd;
+    public event Action<OnUsePowerUpEvent> OnUsePowerUp;
+    public class OnUsePowerUpEvent
+    {
+        public GameManager.PowerUp powerUp;
+    }
 
     public GridTileBase bubblePrefab; // Bubble prefab
 
@@ -158,7 +163,6 @@ public class GridManager : MonoBehaviour
         RemoveGrid(tile);
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
-
     }
 
     public void PowerUpVerticalLine(GridTileBase tile)

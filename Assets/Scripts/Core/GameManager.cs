@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,22 +21,36 @@ public class GameManager : MonoBehaviour
     public GameState gameState;
 
     public SceneConfigSO sceneConfig;
+    private SceneConfigSO _currentSceneConfigSO;
 
     private int _currentTurns = 0;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
+
+        if(sceneConfig == null) { Debug.LogError("Please add Scene Config Scriptable Object To Game Manager"); }
     }
 
     private void Start()
     {
-        _currentTurns = sceneConfig.MaxTurns;
+        if (sceneConfig != null)
+        {
+            _currentSceneConfigSO = sceneConfig;
+            _currentTurns = _currentSceneConfigSO.MaxTurns;
+        }
+
         GridManager.Instance.OnUpdateGrid += Instance_OnUpdateGrid;
         GridManager.Instance.OnTurnEnd += Instance_OnTurnEnd;
+        GridManager.Instance.OnUsePowerUp += Instance_OnUsePowerUp;
         GridTileBase.OnGridClick += GridTileBase_OnGridClick;
         OnWinGame += GameManager_OnWinGame;
         OnLoseGame += GameManager_OnLoseGame;
+    }
+
+    private void Instance_OnUsePowerUp(GridManager.OnUsePowerUpEvent obj)
+    {
+       // set based on ui later
     }
 
     private void GameManager_OnLoseGame()
@@ -96,6 +111,11 @@ public class GameManager : MonoBehaviour
     public int GetTurnRemain()
     {
         return _currentTurns;
+    }
+
+    public SceneConfigSO GetSceneConfigSO()
+    {
+        return _currentSceneConfigsSO;
     }
 }
 
