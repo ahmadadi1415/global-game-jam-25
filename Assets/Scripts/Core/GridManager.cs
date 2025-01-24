@@ -11,7 +11,7 @@ public class GridManager : MonoBehaviour
     public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
     public class OnUsePowerUpEvent
     {
-        public PowerUp powerUp;
+        public PowerUpType powerUp;
     }
 
     public GridTileBase bubblePrefab; // Bubble prefab
@@ -91,22 +91,22 @@ public class GridManager : MonoBehaviour
     {
         switch (GameManager.Instance.GetPowerUp())
         {
-            case PowerUp.BASIC:
+            case PowerUpType.BASIC:
                 PowerUpBasic(obj.GridTileBase);
                 break;
-            case PowerUp.VERTICAL:
+            case PowerUpType.VERTICAL:
                 PowerUpVerticalLine(obj.GridTileBase);
                 break;
-            case PowerUp.HORIZONTAL:
+            case PowerUpType.HORIZONTAL:
                 PowerUpHorizontalLine(obj.GridTileBase);
                 break;
-            case PowerUp.CROSS:
+            case PowerUpType.CROSS:
                 PowerUpCross(obj.GridTileBase);
                 break;
-            case PowerUp.SURROUND:
+            case PowerUpType.SURROUND:
                 PowerUpSurrounding(obj.GridTileBase);
                 break;
-            case PowerUp.TRIPLE:
+            case PowerUpType.TRIPLE:
                 PowerUpTripleClick(obj.GridTileBase);
                 break;
         }
@@ -289,6 +289,7 @@ public class GridManager : MonoBehaviour
         if (_tripleRemain > 0)
         {
             _tripleRemain--;
+            bubbleTiles.Remove(tile);
             RemoveGrid(tile);
             OnUpdateGrid?.Invoke();
         }

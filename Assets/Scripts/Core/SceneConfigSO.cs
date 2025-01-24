@@ -7,12 +7,12 @@ public class SceneConfigSO : ScriptableObject
     [Header("General")]
     public int MaxTurns;
 
-    [Header("Power Up")]
-    public int Horizontal;
-    public int Vertical;
-    public int Surround;
-    public int Cross;
-    public int Triple;
+    [Header("Power Up Limits")]
+    public int HorizontalLimit;
+    public int VerticalLimit;
+    public int SurroundLimit;
+    public int CrossLimit;
+    public int TripleLimit;
 
     [Header("Grid")]
     public int Width;

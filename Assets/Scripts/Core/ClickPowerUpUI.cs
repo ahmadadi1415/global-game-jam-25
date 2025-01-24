@@ -5,11 +5,11 @@ using UnityEngine.UI;
 public class ClickPowerUpUI : MonoBehaviour
 {
     private Button _button;
-    [SerializeField] private PowerUp powerUp;
+    [SerializeField] private PowerUpType powerUp;
     public static event Action OnClickPowerUpUI;
     public class OnClickPowerUIEvent
     {
-        public PowerUp powerUp;
+        public PowerUpType powerUp;
     }
 
     private void Awake()

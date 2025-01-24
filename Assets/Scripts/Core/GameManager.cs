@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 
-public enum GameState { START, PLAYING, LOSE, WIN };
-public enum PowerUp { BASIC, VERTICAL, HORIZONTAL, CROSS, SURROUND, TRIPLE };
+public enum GameState { PLAYING, LOSE, WIN };
+public enum PowerUpType { BASIC, VERTICAL, HORIZONTAL, CROSS, SURROUND, TRIPLE };
 
 public class GameManager : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public static event Action OnLoseGame;
     public static event Action OnWinGame;
 
-    public PowerUp powerUp;
+    public PowerUpType powerUp;
     public GameState gameState;
 
     public SceneConfigSO sceneConfig;
@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int _maxTurns = 0;
 
     [SerializeField] private GridManager _gridManager;
+    [SerializeField] private PowerUpManager _powerUpManager;
 
     private void Awake()
     {
@@ -71,6 +72,7 @@ public class GameManager : MonoBehaviour
 
     private void OnLevelLoaded(OnLevelLoadedMessage message)
     {
+        gameState = GameState.PLAYING;
         UpdateGameData(message.Level);
     }
 
@@ -130,7 +132,7 @@ public class GameManager : MonoBehaviour
     private void Instance_OnTurnEnd()
     {
         _currentTurns--;
-        SetPowerUp(PowerUp.BASIC);
+        SetPowerUp(PowerUpType.BASIC);
         // Debug.Log(_currentTurns);
     }
 
@@ -139,12 +141,26 @@ public class GameManager : MonoBehaviour
         Debug.Log("Grid updated");
     }
 
-    public void SetPowerUp(PowerUp powerUp)
+    public void SetPowerUp(PowerUpType powerUp)
     {
-        this.powerUp = powerUp;
+        if (powerUp == PowerUpType.BASIC)
+        {
+            this.powerUp = powerUp;
+            return;
+        }
+
+        if (_powerUpManager.UsePowerUp(powerUp))
+        {
+            this.powerUp = powerUp;
+        }
+        else
+        {
+            Debug.Log($"Cant use this power up: {powerUp}");
+            this.powerUp = PowerUpType.BASIC;
+        }
     }
 
-    public PowerUp GetPowerUp()
+    public PowerUpType GetPowerUp()
     {
         return powerUp;
     }
