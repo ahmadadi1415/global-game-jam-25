@@ -14,13 +14,15 @@ public class GameManager : MonoBehaviour
     [Serializable]
     public enum PowerUp { Basic, Vertical, Horizontal, Cross, Surround, Triple };
 
-    public PowerUp _powerUp;
-    public GameState _gameState;
+    public PowerUp powerUp;
+    public GameState gameState;
 
-    public int maxTurns = 20; // Maximum number of turns
-    public Text turnsText; // UI Text to display remaining turns
-    public Text statusText; // UI Text to display game status
-    private int currentTurns;
+    //public Text turnsText; // UI Text to display remaining turns
+    //public Text statusText; // UI Text to display game status
+
+    public SceneConfigSO sceneConfig;
+
+    private int _currentTurns;
 
     private void Awake()
     {
@@ -29,7 +31,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        currentTurns = maxTurns;
+        _currentTurns = sceneConfig.MaxTurns;
         GridManager.Instance.OnUpdateGrid += Instance_OnUpdateGrid;
         UpdateUI();
     }
@@ -41,39 +43,43 @@ public class GameManager : MonoBehaviour
 
     public void SetPowerUp(PowerUp powerUp)
     {
-        _powerUp = powerUp;
+        this.powerUp = powerUp;
     }
 
     public PowerUp GetPowerUp()
     {
-        return _powerUp;
+        return powerUp;
     }
 
     public void SetGameState(GameState gameState)
     {
-        _gameState = gameState;
+        this.gameState = gameState;
     }
 
     public GameState GetGameState()
     {
-        return _gameState;
+        return gameState;
     }
 
+    public int GetTurnRemain()
+    {
+        return _currentTurns;
+    }
     public void BubbleDestroyed()
     {
-        currentTurns--;
+        _currentTurns--;
         CheckGameStatus();
         UpdateUI();
     }
 
     void CheckGameStatus()
     {
-        if (GridManager.Instance.tiles.Count == 0 && currentTurns > 0)
+        if (GridManager.Instance.tiles.Count == 0 && _currentTurns > 0)
         {
             //statusText.text = "You Win!";
             EndGame();
         }
-        else if (currentTurns <= 0)
+        else if (_currentTurns <= 0)
         {
             //statusText.text = "You Lose!";
             EndGame();
@@ -90,11 +96,7 @@ public class GameManager : MonoBehaviour
 
     void EndGame()
     {
-        // Disable all bubbles
-        foreach (var bubble in FindObjectsOfType<Bubble>())
-        {
-            bubble.enabled = false;
-        }
+        
     }
 }
 

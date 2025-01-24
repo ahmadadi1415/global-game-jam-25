@@ -57,6 +57,32 @@ public class GridManager : MonoBehaviour
     private void Start()
     {
         GenerateGrid();
+        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+    }
+
+    private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
+    {
+        switch (GameManager.Instance.GetPowerUp())
+        {
+            case GameManager.PowerUp.Basic:
+                GridManager.Instance.PowerUpBasic(obj.GridTileBase);
+                break;
+            case GameManager.PowerUp.Vertical:
+                GridManager.Instance.PowerUpVerticalLine(obj.GridTileBase);
+                break;
+            case GameManager.PowerUp.Horizontal:
+                GridManager.Instance.PowerUpHorizontalLine(obj.GridTileBase);
+                break;
+            case GameManager.PowerUp.Cross:
+                GridManager.Instance.PowerUpCross(obj.GridTileBase);
+                break;
+            case GameManager.PowerUp.Surround:
+                GridManager.Instance.PowerUpSurrounding(obj.GridTileBase);
+                break;
+            case GameManager.PowerUp.Triple:
+                GridManager.Instance.PowerUpTripleClick(obj.GridTileBase);
+                break;
+        }
     }
 
     private void LateUpdate()
