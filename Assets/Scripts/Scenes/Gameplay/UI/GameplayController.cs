@@ -1,18 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameplayController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public bool IsPlaying = true;
+    private void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            IsPlaying = !IsPlaying;
+            EventManager.Publish<OnPlayStateChangedMessage>(new() { IsPlaying = IsPlaying });
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-        
+        EventManager.Subscribe<OnPlayStateChangedMessage>(OnPlayStateChanged);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Unsubscribe<OnPlayStateChangedMessage>(OnPlayStateChanged);
+    }
+
+    private void OnPlayStateChanged(OnPlayStateChangedMessage message)
+    {
+        Time.timeScale = message.IsPlaying ? 1 : 0;
     }
 }

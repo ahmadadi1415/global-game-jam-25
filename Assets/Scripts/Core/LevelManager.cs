@@ -16,29 +16,39 @@ public class LevelManager : MonoBehaviour
             return;
         }
     }
-
-    private void OnEnable()
-    {
-        EventManager.Subscribe<OnLevelFinishedMessage>(OnLevelFinished);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.Unsubscribe<OnLevelFinishedMessage>(OnLevelFinished);
-    }
-
     private void Start()
     {
         LoadLevel(currentLevelIndex);
     }
 
+    private void OnEnable()
+    {
+        // EventManager.Subscribe<OnLevelFinishedMessage>(OnLevelFinished);
+        EventManager.Subscribe<OnNextLevelClickedMessage>(OnNextLevelClicked);
+        EventManager.Subscribe<OnRestartLevelClickedMessage>(OnRestartLevelClicked);
+    }
+
+    private void OnDisable()
+    {
+        // EventManager.Unsubscribe<OnLevelFinishedMessage>(OnLevelFinished);
+        EventManager.Unsubscribe<OnNextLevelClickedMessage>(OnNextLevelClicked);
+        EventManager.Unsubscribe<OnRestartLevelClickedMessage>(OnRestartLevelClicked);
+    }
+
+    private void OnRestartLevelClicked(OnRestartLevelClickedMessage message)
+    {
+        RestartLevel();
+    }
+
+    private void OnNextLevelClicked(OnNextLevelClickedMessage message)
+    {
+        LoadNextLevel();
+    }
+
+
     private void OnLevelFinished(OnLevelFinishedMessage message)
     {
-        if (message.IsWin)
-        {
-            LoadNextLevel();
-        }
-        else
+        if (!message.IsWin)
         {
             RestartLevel();
         }
@@ -49,6 +59,7 @@ public class LevelManager : MonoBehaviour
         if (index >= levels.Count)
         {
             Debug.Log("All level is completed");
+            EventManager.Publish<OnGameCompletedMessage>(new());
             return;
         }
 
