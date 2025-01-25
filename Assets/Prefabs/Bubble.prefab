@@ -113,6 +113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   State: 0
+  popClip: {fileID: 8300000, guid: c81173f3fc14f0a44838f81d78bd16d4, type: 3}
 --- !u!61 &7695697301686748591
 BoxCollider2D:
   m_ObjectHideFlags: 0
