@@ -26,18 +26,18 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
 
-        if (sceneConfig == null)
-        {
-            Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
-        }
-        else
-        {
-            if (sceneConfig != null)
-            {
-                _currentSceneConfigSO = sceneConfig;
-                UpdateGameData(_currentSceneConfigSO);
-            }
-        }
+        // if (sceneConfig == null)
+        // {
+        //     Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
+        // }
+        // else
+        // {
+        //     if (sceneConfig != null)
+        //     {
+        //         _currentSceneConfigSO = sceneConfig;
+        //         UpdateGameData(_currentSceneConfigSO);
+        //     }
+        // }
     }
 
     private void UpdateGameData(SceneConfigSO level)

@@ -25,7 +25,7 @@ public class GridTileBase : MonoBehaviour
     public void Init(Vector3 t, BubbleState state, Vector2 offset)
     {
         _bubblePosition = t;
-        transform.position = t + (Vector3) offset;
+        transform.position = t + (Vector3)offset;
 
         switch (state)
         {
@@ -53,14 +53,22 @@ public class GridTileBase : MonoBehaviour
         SetState(BubbleState.POPPING);
         // spriteRenderer.color = Color.red;
         animator.SetTrigger("popping");
-        LeanTween.delayedCall(0.5f, () => SetState(BubbleState.POPPED));
+        // EventManager.Publish<OnBubblePoppedMessage>(new() { BubblePosition = transform.position });
+        LeanTween.delayedCall(0.5f, () =>
+        {
+            SetState(BubbleState.POPPED);
+        });
     }
 
     public void SetPopped()
     {
         SetState(BubbleState.POPPED);
         // if (spriteRenderer != null) spriteRenderer.color = Color.black;
-        LeanTween.delayedCall(RandomizeStartDelay(), () => animator.SetTrigger("popped"));
+        LeanTween.delayedCall(RandomizeStartDelay(), () =>
+        {
+            animator.SetTrigger("popped");
+            // EventManager.Publish<OnBubblePoppedMessage>(new() { BubblePosition = transform.position });
+        });
     }
 
     public void SetUnpopped()
