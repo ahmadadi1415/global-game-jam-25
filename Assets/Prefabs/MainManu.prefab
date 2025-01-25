@@ -644,6 +644,10 @@ MonoBehaviour:
   closeBtn: {fileID: 1064819120797864204}
   buttonPanel: {fileID: 535756220001868257}
   creditPanel: {fileID: 3553856806568374637}
+  startClip: {fileID: 8300000, guid: 953d613a75072a74eb65547f06740213, type: 3}
+  clickClip: {fileID: 8300000, guid: 6b39ca2c704026843ac4492254933b71, type: 3}
+  hoverClip: {fileID: 8300000, guid: a1b4a5112be11994b83848487145be79, type: 3}
+  hoverColor: {r: 0.73333335, g: 1, b: 1, a: 1}
 --- !u!1 &1422915751786516588
 GameObject:
   m_ObjectHideFlags: 0
