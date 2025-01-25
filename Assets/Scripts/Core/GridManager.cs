@@ -21,6 +21,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Vector2 _gap = new Vector2(1f, 1f);
     [SerializeField] private int height = 5; // Number of rows
     [SerializeField] private int width = 5; // Number of columns
+    [SerializeField] private Vector2 gridOffset = Vector2.zero;
     [SerializeField] private List<Vector2Int> holes = new();
     [SerializeField] private Vector2 _cellSize;
 
@@ -152,8 +153,6 @@ public class GridManager : MonoBehaviour
         height = level.Height;
         holes = level.Holes;
 
-        Debug.Log($"{width}, {height}");
-
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -178,16 +177,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase spawnedBubble = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
 
-            if (isPopped)
-            {
-                spawnedBubble.SetPopped();
-            }
-            else
-            {
-                spawnedBubble.SetUnpopped();
-            }
-
-            spawnedBubble.Init(coord);
+            spawnedBubble.Init(coord, isPopped ? BubbleState.POPPED : BubbleState.UNPOPPED, gridOffset);
 
             bubbleTiles.Add(spawnedBubble);
             bound.Encapsulate(position);
@@ -253,7 +243,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpVerticalLine(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int y = 0; y < height; y++)
@@ -262,7 +252,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -283,7 +273,7 @@ public class GridManager : MonoBehaviour
     public void PowerUpHorizontalLine(GridTileBase tile)
     {
 
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int x = 0; x < width; x++)
@@ -292,7 +282,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -331,7 +321,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpCross(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int y = 0; y < height; y++)
@@ -340,7 +330,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -358,7 +348,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -378,7 +368,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpSurrounding(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
@@ -391,7 +381,7 @@ public class GridManager : MonoBehaviour
                 {
                     GridTileBase bubbleToPop = bubbleTiles.Find(t =>
                     {
-                        Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                        Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                         return tileGridPosition == checkCoord;
                     });
 
