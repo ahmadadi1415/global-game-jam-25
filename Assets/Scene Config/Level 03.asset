@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be92de5334ff72548a8b29f40c1a8028, type: 3}
-  m_Name: Level 01
+  m_Name: Level 03
   m_EditorClassIdentifier: 
-  MaxTurns: 3
-  HorizontalLimit: 0
+  MaxTurns: 5
+  HorizontalLimit: 2
   VerticalLimit: 0
   SurroundLimit: 0
   CrossLimit: 0
   TripleLimit: 0
   Width: 3
-  Height: 3
+  Height: 4
   Holes:
   - {x: 0, y: 0}
-  - {x: 1, y: 0}
   - {x: 2, y: 0}
-  - {x: 0, y: 2}
-  - {x: 1, y: 2}
+  - {x: 0, y: 1}
   - {x: 2, y: 2}
+  - {x: 0, y: 3}
+  - {x: 2, y: 3}

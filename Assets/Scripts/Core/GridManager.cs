@@ -5,21 +5,23 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
-    public event Action OnUpdateGrid;
-    public event Action OnTurnEnd;
-    public event Action<OnUsePowerUpEvent> OnUsePowerUp;
+    public static event Action OnUpdateGrid;
+    public static event Action OnTurnEnd;
+    public static event Action OnGameStateChecked;
+    public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
     public class OnUsePowerUpEvent
     {
-        public GameManager.PowerUp powerUp;
+        public PowerUpType powerUp;
     }
 
     public GridTileBase bubblePrefab; // Bubble prefab
 
-    public List<GridTileBase> tiles = new List<GridTileBase>();
+    public List<GridTileBase> bubbleTiles = new List<GridTileBase>();
 
     [SerializeField] private Vector2 _gap = new Vector2(1f, 1f);
-    [SerializeField] private int rows = 5; // Number of rows
-    [SerializeField] private int columns = 5; // Number of columns
+    [SerializeField] private int height = 5; // Number of rows
+    [SerializeField] private int width = 5; // Number of columns
+    [SerializeField] private List<Vector2Int> holes = new();
     [SerializeField] private Vector2 _cellSize;
 
     private bool _requiresGeneration = true;
@@ -43,18 +45,18 @@ public class GridManager : MonoBehaviour
         _grid = GetComponent<Grid>();
         _currentGap = _gap;
 
-        _grid.cellSize.Set(_cellSize.x,_cellSize.y,0); 
+        _grid.cellSize.Set(_cellSize.x, _cellSize.y, 0);
         _grid.cellGap = _currentGap;
         _grid.cellLayout = GridLayout.CellLayout.Rectangle;
 
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
-        } else
+        }
+        else
         {
             Destroy(this);
         }
-
     }
 
     private void OnValidate()
@@ -62,35 +64,56 @@ public class GridManager : MonoBehaviour
         _requiresGeneration = true;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        GenerateGrid();
-        GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+        EventManager.Subscribe<OnLevelLoadedMessage>(OnLevelLoaded);
+        EventManager.Subscribe<OnBubbleClickedMessage>(OnBubbleClicked);
+        // GridTileBase.OnGridClick += GridTileBase_OnGridClick;
     }
 
-    private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
+    private void OnDisable()
     {
+        EventManager.Unsubscribe<OnLevelLoadedMessage>(OnLevelLoaded);
+        EventManager.Unsubscribe<OnBubbleClickedMessage>(OnBubbleClicked);
+        // GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+    }
+
+    private void OnLevelLoaded(OnLevelLoadedMessage message)
+    {
+        // DO: Update the grids
+        GenerateGrid(message.Level);
+    }
+
+    private void Start()
+    {
+        // GenerateGrid(GameManager.Instance.sceneConfig);
+    }
+
+    private void OnBubbleClicked(OnBubbleClickedMessage message)
+    {
+        GridTileBase bubble = message.Bubble;
         switch (GameManager.Instance.GetPowerUp())
         {
-            case GameManager.PowerUp.Basic:
-                PowerUpBasic(obj.GridTileBase);
+            case PowerUpType.BASIC:
+                PowerUpBasic(bubble);
                 break;
-            case GameManager.PowerUp.Vertical:
-                PowerUpVerticalLine(obj.GridTileBase);
+            case PowerUpType.VERTICAL:
+                PowerUpVerticalLine(bubble);
                 break;
-            case GameManager.PowerUp.Horizontal:
-                PowerUpHorizontalLine(obj.GridTileBase);
+            case PowerUpType.HORIZONTAL:
+                PowerUpHorizontalLine(bubble);
                 break;
-            case GameManager.PowerUp.Cross:
-                PowerUpCross(obj.GridTileBase);
+            case PowerUpType.CROSS:
+                PowerUpCross(bubble);
                 break;
-            case GameManager.PowerUp.Surround:
-                PowerUpSurrounding(obj.GridTileBase);
+            case PowerUpType.SURROUND:
+                PowerUpSurrounding(bubble);
                 break;
-            case GameManager.PowerUp.Triple:
-                PowerUpTripleClick(obj.GridTileBase);
+            case PowerUpType.TRIPLE:
+                PowerUpTripleClick(bubble);
                 break;
         }
+
     }
 
     private void LateUpdate()
@@ -101,38 +124,72 @@ public class GridManager : MonoBehaviour
             _requiresGeneration = true;
         }
 
-        if (_requiresGeneration) GenerateGrid();
+        if (_requiresGeneration) GenerateGrid(LevelManager.CurrentLevel);
 
         //     _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, _cameraPositionTarget, ref _moveVel, 0.8f);
         // _cam.orthographicSize = Mathf.SmoothDamp(_cam.orthographicSize, _cameraSizeTarget, ref _cameraSizeVel, 0.8f);
     }
 
-    void GenerateGrid()
+    private void InitBubbleGrid()
     {
-        var coordinates = new List<Vector3Int>();
-
-        for (int row = 0; row < rows; row++)
+        // DO: Reset tiles
+        foreach (GridTileBase bubble in bubbleTiles)
         {
-            for (int col = 0; col < columns; col++)
+            bubble.gameObject.SetActive(false);
+            // bubble.Destroy();
+            Destroy(bubble.gameObject);
+        }
+
+        bubbleTiles.Clear();
+    }
+
+    void GenerateGrid(SceneConfigSO level)
+    {
+        InitBubbleGrid();
+
+        List<Vector3Int> coordinates = new();
+        width = level.Width;
+        height = level.Height;
+        holes = level.Holes;
+
+        Debug.Log($"{width}, {height}");
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
             {
-                coordinates.Add(new Vector3Int(col, row, 0));
+                coordinates.Add(new Vector3Int(x, y, 0));
             }
         }
 
-        var bound = new Bounds();
+        Bounds bound = new();
 
         if (coordinates.Count > 0)
         {
-            var firstPosition = _grid.GetCellCenterWorld(coordinates[0]);
+            Vector3 firstPosition = _grid.GetCellCenterWorld(coordinates[0]);
             bound = new Bounds(firstPosition, Vector3.zero);
         }
 
-        foreach (var coord in coordinates)
+        foreach (Vector3Int coord in coordinates)
         {
-            var position = _grid.GetCellCenterWorld(coord);
-            GridTileBase spawned = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
-            spawned.Init(coord);
-            tiles.Add(spawned);
+            bool isPopped = holes.Contains((Vector2Int)coord);
+
+            Vector3 position = _grid.GetCellCenterWorld(coord);
+
+            GridTileBase spawnedBubble = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
+
+            if (isPopped)
+            {
+                spawnedBubble.SetPopped();
+            }
+            else
+            {
+                spawnedBubble.SetUnpopped();
+            }
+
+            spawnedBubble.Init(coord);
+
+            bubbleTiles.Add(spawnedBubble);
             bound.Encapsulate(position);
         }
 
@@ -147,6 +204,33 @@ public class GridManager : MonoBehaviour
         gridTileBase.Destroy();
     }
 
+    public void CheckGameState()
+    {
+        // DO: Notify game manager to win the game and continue to next level
+        EventManager.Publish<OnBubblesCheckedMessage>(new() { IsAllPopped = IsAllBubblePopped() });
+    }
+
+    public bool IsAllBubblePopped()
+    {
+        bool isAllPopped = true;
+
+        if (bubbleTiles.Count <= 0)
+        {
+            return isAllPopped;
+        }
+
+        foreach (GridTileBase bubble in bubbleTiles)
+        {
+            if (bubble.State == BubbleState.UNPOPPED)
+            {
+                isAllPopped = false;
+                break;
+            }
+        }
+
+        return isAllPopped;
+    }
+
     private void SetCamera(Bounds bounds)
     {
         bounds.Expand(2);
@@ -158,11 +242,13 @@ public class GridManager : MonoBehaviour
         _cameraSizeTarget = Mathf.Max(horizontal, vertical) * 0.5f;
     }
 
-    public void PowerUpBasic(GridTileBase tile)
+    public void PowerUpBasic(GridTileBase bubbleToPop)
     {
-        RemoveGrid(tile);
-        OnUpdateGrid?.Invoke();
+        bubbleToPop.StartPop();
+
+        // RemoveGrid(bubbleToPop);
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpVerticalLine(GridTileBase tile)
@@ -170,25 +256,28 @@ public class GridManager : MonoBehaviour
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
-        for (int y = 0; y < rows; y++)
+        for (int y = 0; y < height; y++)
         {
             Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
             });
 
-            if (tileToRemove != null)
-            {
-                tiles.Remove(tileToRemove);
-                RemoveGrid(tileToRemove);
-            }
+            bubbleToPop?.StartPop();
+            // if (bubbleToPop != null)
+            // {
+            //     bubbleToPop.SetState(BubbleState.POPPING);
+            //     // bubbleTiles.Remove(bubbleToPop);
+            //     // RemoveGrid(bubbleToPop);
+            // }
         }
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpHorizontalLine(GridTileBase tile)
@@ -197,39 +286,47 @@ public class GridManager : MonoBehaviour
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
-        for (int x = 0; x < columns; x++)
+        for (int x = 0; x < width; x++)
         {
             Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
             });
 
-            if (tileToRemove != null)
-            {
-                tiles.Remove(tileToRemove);
-                RemoveGrid(tileToRemove);
-            }
+            bubbleToPop?.StartPop();
+            // if (tileToRemove != null)
+            // {
+            //     bubbleTiles.Remove(tileToRemove);
+            //     RemoveGrid(tileToRemove);
+            // }
         }
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
-    public void PowerUpTripleClick(GridTileBase tile)
+    public void PowerUpTripleClick(GridTileBase bubbleToPop)
     {
-        if(_tripleRemain > 0)
+        if (_tripleRemain > 0)
         {
             _tripleRemain--;
-            RemoveGrid(tile);
-            OnUpdateGrid?.Invoke();
+            bubbleToPop?.StartPop();
+            // bubbleTiles.Remove(tile);
+            // RemoveGrid(tile);
+            // OnUpdateGrid?.Invoke();
         }
 
         OnUpdateGrid?.Invoke();
 
-        if (_tripleRemain <= 0) OnTurnEnd?.Invoke();
+        if (_tripleRemain <= 0)
+        {
+            OnTurnEnd?.Invoke();
+            CheckGameState();
+        };
     }
 
     public void PowerUpCross(GridTileBase tile)
@@ -237,42 +334,46 @@ public class GridManager : MonoBehaviour
         Vector3 tilePosition = tile.GetPositionTile();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
-        for (int y = 0; y < rows; y++)
+        for (int y = 0; y < height; y++)
         {
             Vector3Int checkCoord = new Vector3Int(tileCoord.x, y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
             });
 
-            if (tileToRemove != null)
-            {
-                tiles.Remove(tileToRemove);
-                RemoveGrid(tileToRemove);
-            }
+            bubbleToPop?.StartPop();
+            // if (bubbleToPop != null)
+            // {
+            //     bubbleTiles.Remove(bubbleToPop);
+            //     RemoveGrid(bubbleToPop);
+            // }
         }
 
-        for (int x = 0; x < columns; x++)
+        for (int x = 0; x < width; x++)
         {
             Vector3Int checkCoord = new Vector3Int(x, tileCoord.y, 0);
 
-            GridTileBase tileToRemove = tiles.Find(t =>
+            GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
                 Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                 return tileGridPosition == checkCoord;
             });
 
-            if (tileToRemove != null)
-            {
-                tiles.Remove(tileToRemove);
-                RemoveGrid(tileToRemove);
-            }
+            bubbleToPop?.StartPop();
+
+            // if (tileToRemove != null)
+            // {
+            //     bubbleTiles.Remove(tileToRemove);
+            //     RemoveGrid(tileToRemove);
+            // }
         }
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 
     public void PowerUpSurrounding(GridTileBase tile)
@@ -286,24 +387,26 @@ public class GridManager : MonoBehaviour
             {
                 Vector3Int checkCoord = new Vector3Int(tileCoord.x + colOffset, tileCoord.y + rowOffset, 0);
 
-                if (checkCoord.x >= 0 && checkCoord.x < columns && checkCoord.y >= 0 && checkCoord.y < rows)
+                if (checkCoord.x >= 0 && checkCoord.x < width && checkCoord.y >= 0 && checkCoord.y < height)
                 {
-                    GridTileBase tileToRemove = tiles.Find(t =>
+                    GridTileBase bubbleToPop = bubbleTiles.Find(t =>
                     {
                         Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
                         return tileGridPosition == checkCoord;
                     });
 
-                    if (tileToRemove != null)
-                    {
-                        tiles.Remove(tileToRemove);
-                        RemoveGrid(tileToRemove);
-                    }
+                    bubbleToPop?.StartPop();
+                    // if (tileToRemove != null)
+                    // {
+                    //     bubbleTiles.Remove(tileToRemove);
+                    //     RemoveGrid(tileToRemove);
+                    // }
                 }
             }
         }
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
+        CheckGameState();
     }
 }

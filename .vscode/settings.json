@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "global-game-jam-25.sln"
+    "dotnet.defaultSolution": "GGJ2025.sln"
 }
