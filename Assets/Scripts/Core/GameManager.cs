@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum GameState { PLAYING, LOSE, WIN };
@@ -26,24 +27,25 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
 
-        if (sceneConfig == null)
-        {
-            Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
-        }
-        else
-        {
-            if (sceneConfig != null)
-            {
-                _currentSceneConfigSO = sceneConfig;
-                UpdateGameData(_currentSceneConfigSO);
-            }
-        }
+        // if (sceneConfig == null)
+        // {
+        //     Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
+        // }
+        // else
+        // {
+        //     if (sceneConfig != null)
+        //     {
+        //         _currentSceneConfigSO = sceneConfig;
+        //         UpdateGameData(_currentSceneConfigSO);
+        //     }
+        // }
     }
 
     private void UpdateGameData(SceneConfigSO level)
     {
         _currentTurns = level.MaxTurns;
         _maxTurns = level.MaxTurns;
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
     }
 
     private void OnEnable()
@@ -80,26 +82,37 @@ public class GameManager : MonoBehaviour
     {
         if (message.IsAllPopped && _currentTurns >= 0)
         {
-            gameState = GameState.WIN;
-            Debug.Log("Game win");
-
-            // DO: Continue to next levels
-            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
+            StartCoroutine(HandleWinState());
         }
         else if (!message.IsAllPopped && _currentTurns == 0)
         {
-            Debug.Log($"Is all popped: {message.IsAllPopped}, {_currentTurns}");
-            gameState = GameState.LOSE;
-            Debug.Log("Game lose");
-
-            // DO: Restart the level
-            EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
+            StartCoroutine(HandleLoseState(message.IsAllPopped));
         }
         else
         {
             gameState = GameState.PLAYING;
         }
     }
+
+    private IEnumerator HandleWinState()
+    {
+        yield return new WaitForSeconds(1.0f);
+        gameState = GameState.WIN;
+        Debug.Log("Game win");
+
+        EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
+    }
+
+    private IEnumerator HandleLoseState(bool isAllPopped)
+    {
+        Debug.Log($"Is all popped: {isAllPopped}, {_currentTurns}");
+        yield return new WaitForSeconds(1.0f);
+        gameState = GameState.LOSE;
+        Debug.Log("Game lose");
+
+        EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
+    }
+
 
     private void Instance_OnUsePowerUp(GridManager.OnUsePowerUpEvent obj)
     {
@@ -134,6 +147,7 @@ public class GameManager : MonoBehaviour
         _currentTurns--;
         _powerUpManager.UsePowerUp(powerUp);
         SetPowerUp(PowerUpType.BASIC);
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
     }
 
     private void Instance_OnUpdateGrid()

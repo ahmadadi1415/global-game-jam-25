@@ -18,18 +18,19 @@ MonoBehaviour:
   SurroundLimit: 1
   CrossLimit: 0
   TripleLimit: 2
-  Width: 5
-  Height: 5
-  Holes:
-  - {x: 0, y: 0}
-  - {x: 1, y: 0}
-  - {x: 3, y: 0}
-  - {x: 4, y: 0}
-  - {x: 0, y: 1}
-  - {x: 4, y: 1}
-  - {x: 1, y: 2}
-  - {x: 0, y: 3}
+  Width: 11
+  Height: 7
+  Bubbles:
+  - {x: 3, y: 1}
+  - {x: 2, y: 2}
+  - {x: 3, y: 2}
+  - {x: 4, y: 2}
   - {x: 1, y: 3}
-  - {x: 0, y: 4}
-  - {x: 2, y: 4}
+  - {x: 3, y: 3}
+  - {x: 4, y: 3}
+  - {x: 5, y: 3}
+  - {x: 3, y: 4}
   - {x: 4, y: 4}
+  - {x: 5, y: 4}
+  - {x: 2, y: 5}
+  - {x: 4, y: 5}

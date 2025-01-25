@@ -9,6 +9,7 @@ public class GridManager : MonoBehaviour
     public static event Action OnTurnEnd;
     public static event Action OnGameStateChecked;
     public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
+
     public class OnUsePowerUpEvent
     {
         public PowerUpType powerUp;
@@ -21,7 +22,8 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Vector2 _gap = new Vector2(1f, 1f);
     [SerializeField] private int height = 5; // Number of rows
     [SerializeField] private int width = 5; // Number of columns
-    [SerializeField] private List<Vector2Int> holes = new();
+    [SerializeField] private Vector2 gridOffset = Vector2.zero;
+    [SerializeField] private List<Vector2Int> bubbles = new();
     [SerializeField] private Vector2 _cellSize;
 
     private bool _requiresGeneration = true;
@@ -96,21 +98,27 @@ public class GridManager : MonoBehaviour
         {
             case PowerUpType.BASIC:
                 PowerUpBasic(bubble);
+                EventManager.Publish<OnBubblePoppedMessage>(new() { BubblePosition = transform.position });
                 break;
             case PowerUpType.VERTICAL:
                 PowerUpVerticalLine(bubble);
+                EventManager.Publish<OnPowerUpUsedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
             case PowerUpType.HORIZONTAL:
                 PowerUpHorizontalLine(bubble);
+                EventManager.Publish<OnPowerUpUsedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
             case PowerUpType.CROSS:
                 PowerUpCross(bubble);
+                EventManager.Publish<OnPowerUpUsedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
             case PowerUpType.SURROUND:
                 PowerUpSurrounding(bubble);
+                EventManager.Publish<OnPowerUpUsedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
             case PowerUpType.TRIPLE:
                 PowerUpTripleClick(bubble);
+                EventManager.Publish<OnPowerUpUsedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
         }
 
@@ -150,9 +158,7 @@ public class GridManager : MonoBehaviour
         List<Vector3Int> coordinates = new();
         width = level.Width;
         height = level.Height;
-        holes = level.Holes;
-
-        Debug.Log($"{width}, {height}");
+        bubbles = level.Bubbles;
 
         for (int y = 0; y < height; y++)
         {
@@ -172,22 +178,13 @@ public class GridManager : MonoBehaviour
 
         foreach (Vector3Int coord in coordinates)
         {
-            bool isPopped = holes.Contains((Vector2Int)coord);
+            bool isBubble = bubbles.Contains((Vector2Int)coord);
 
             Vector3 position = _grid.GetCellCenterWorld(coord);
 
             GridTileBase spawnedBubble = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
 
-            if (isPopped)
-            {
-                spawnedBubble.SetPopped();
-            }
-            else
-            {
-                spawnedBubble.SetUnpopped();
-            }
-
-            spawnedBubble.Init(coord);
+            spawnedBubble.Init(coord, isBubble ? BubbleState.UNPOPPED : BubbleState.POPPED, gridOffset);
 
             bubbleTiles.Add(spawnedBubble);
             bound.Encapsulate(position);
@@ -245,6 +242,10 @@ public class GridManager : MonoBehaviour
     public void PowerUpBasic(GridTileBase bubbleToPop)
     {
         bubbleToPop.StartPop();
+        // if (popClip != null)
+        // {
+        //     AudioSource.PlayClipAtPoint(popClip, transform.position);
+        // }
 
         // RemoveGrid(bubbleToPop);
         OnTurnEnd?.Invoke();
@@ -253,7 +254,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpVerticalLine(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int y = 0; y < height; y++)
@@ -262,7 +263,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -275,6 +276,11 @@ public class GridManager : MonoBehaviour
             // }
         }
 
+        // if (powerUpUseClip != null)
+        // {
+        //     AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        // }
+
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
         CheckGameState();
@@ -283,7 +289,7 @@ public class GridManager : MonoBehaviour
     public void PowerUpHorizontalLine(GridTileBase tile)
     {
 
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int x = 0; x < width; x++)
@@ -292,7 +298,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -304,6 +310,11 @@ public class GridManager : MonoBehaviour
             // }
         }
 
+        // if (powerUpUseClip != null)
+        // {
+        //     AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        // }
+
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
         CheckGameState();
@@ -314,7 +325,19 @@ public class GridManager : MonoBehaviour
         if (_tripleRemain > 0)
         {
             _tripleRemain--;
-            bubbleToPop?.StartPop();
+            bubbleToPop.StartPop();
+
+            if (IsAllBubblePopped())
+            {
+                OnTurnEnd?.Invoke();
+                CheckGameState();
+                _tripleRemain = 3;
+                return;
+            }
+            // if (powerUpUseClip != null)
+            // {
+            //     AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+            // }
             // bubbleTiles.Remove(tile);
             // RemoveGrid(tile);
             // OnUpdateGrid?.Invoke();
@@ -326,12 +349,13 @@ public class GridManager : MonoBehaviour
         {
             OnTurnEnd?.Invoke();
             CheckGameState();
+            _tripleRemain = 3;
         };
     }
 
     public void PowerUpCross(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int y = 0; y < height; y++)
@@ -340,7 +364,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -358,7 +382,7 @@ public class GridManager : MonoBehaviour
 
             GridTileBase bubbleToPop = bubbleTiles.Find(t =>
             {
-                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                 return tileGridPosition == checkCoord;
             });
 
@@ -371,6 +395,11 @@ public class GridManager : MonoBehaviour
             // }
         }
 
+        // if (powerUpUseClip != null)
+        // {
+        //     AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        // }
+
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
         CheckGameState();
@@ -378,7 +407,7 @@ public class GridManager : MonoBehaviour
 
     public void PowerUpSurrounding(GridTileBase tile)
     {
-        Vector3 tilePosition = tile.GetPositionTile();
+        Vector3 tilePosition = tile.GetTilePosition();
         Vector3Int tileCoord = Vector3Int.RoundToInt(tilePosition);
 
         for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
@@ -391,7 +420,7 @@ public class GridManager : MonoBehaviour
                 {
                     GridTileBase bubbleToPop = bubbleTiles.Find(t =>
                     {
-                        Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetPositionTile());
+                        Vector3Int tileGridPosition = Vector3Int.RoundToInt(t.GetTilePosition());
                         return tileGridPosition == checkCoord;
                     });
 
@@ -404,6 +433,11 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        // if (powerUpUseClip != null)
+        // {
+        //     AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        // }
 
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();

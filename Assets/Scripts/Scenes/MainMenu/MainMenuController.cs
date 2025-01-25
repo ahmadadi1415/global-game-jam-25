@@ -16,7 +16,7 @@ public class MainMenuController : MonoBehaviour
     }
     void OnStartClick()
     {
-        SceneManager.LoadScene("Level 1");
+        SceneManager.LoadScene("Gameplay");
     }
     void OnCreditClick()
     {
