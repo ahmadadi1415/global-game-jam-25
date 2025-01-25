@@ -3500,7 +3500,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 91fa545d8ab9007419a5b39cdb0cb60a, type: 2}
   - {fileID: 11400000, guid: 880117efd3e83c24e83a597ac25dda3e, type: 2}
   - {fileID: 11400000, guid: 7a2dddadac472c949a50b7629fd01f97, type: 2}
-  currentLevelIndex: 6
+  currentLevelIndex: 0
 --- !u!4 &825708472
 Transform:
   m_ObjectHideFlags: 0
@@ -3666,7 +3666,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &874368034
 RectTransform:
   m_ObjectHideFlags: 0

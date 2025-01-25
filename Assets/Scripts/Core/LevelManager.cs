@@ -23,14 +23,14 @@ public class LevelManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // EventManager.Subscribe<OnLevelFinishedMessage>(OnLevelFinished);
+        EventManager.Subscribe<OnLevelFinishedMessage>(OnLevelFinished);
         EventManager.Subscribe<OnNextLevelClickedMessage>(OnNextLevelClicked);
         EventManager.Subscribe<OnRestartLevelClickedMessage>(OnRestartLevelClicked);
     }
 
     private void OnDisable()
     {
-        // EventManager.Unsubscribe<OnLevelFinishedMessage>(OnLevelFinished);
+        EventManager.Unsubscribe<OnLevelFinishedMessage>(OnLevelFinished);
         EventManager.Unsubscribe<OnNextLevelClickedMessage>(OnNextLevelClicked);
         EventManager.Unsubscribe<OnRestartLevelClickedMessage>(OnRestartLevelClicked);
     }

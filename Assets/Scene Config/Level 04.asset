@@ -17,7 +17,7 @@ MonoBehaviour:
   VerticalLimit: 1
   SurroundLimit: 0
   CrossLimit: 1
-  TripleLimit: 0
+  TripleLimit: 1
   Width: 11
   Height: 7
   Bubbles:

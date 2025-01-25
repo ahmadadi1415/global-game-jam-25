@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be92de5334ff72548a8b29f40c1a8028, type: 3}
   m_Name: Level 05
   m_EditorClassIdentifier: 
-  MaxTurns: 5
+  MaxTurns: 3
   HorizontalLimit: 0
   VerticalLimit: 0
   SurroundLimit: 1
