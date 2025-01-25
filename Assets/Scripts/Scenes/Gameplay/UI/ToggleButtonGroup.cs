@@ -58,6 +58,13 @@ public class ToggleButtonGroup : MonoBehaviour
 
     private void SelectButton(Button button)
     {
+        LeanTween.delayedCall(0.35f, () =>
+        {
+            LeanTween.scale(button.gameObject, new Vector3(1.1f, 1.1f, 1f), 0.4f) // Scale up
+                .setEaseInOutSine()
+                .setLoopPingPong();
+        });
+
         // Update button visuals for selected state
         var colors = button.colors;
         colors.normalColor = _buttonSelectedColor; // Example: make it green when selected
@@ -66,6 +73,7 @@ public class ToggleButtonGroup : MonoBehaviour
 
     private void DeselectButton(Button button)
     {
+        LeanTween.cancel(button.gameObject);
         // Reset button visuals for normal state
         var colors = button.colors;
         colors.normalColor = _buttonUnselectedColor; // Example: revert to white
