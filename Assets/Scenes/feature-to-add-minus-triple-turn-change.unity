@@ -891,7 +891,7 @@ GameObject:
   - component: {fileID: 288041373}
   - component: {fileID: 288041372}
   m_Layer: 5
-  m_Name: HorizontalLimitText
+  m_Name: TripleLimitText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1025,7 +1025,7 @@ GameObject:
   - component: {fileID: 337260778}
   - component: {fileID: 337260777}
   m_Layer: 5
-  m_Name: HorizontalLimitText
+  m_Name: VerticalLimitText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1453,7 +1453,7 @@ GameObject:
   - component: {fileID: 608688116}
   - component: {fileID: 608688115}
   m_Layer: 5
-  m_Name: HorizontalLimitText
+  m_Name: SurroundLimitText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2889,6 +2889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1590754358}
   - component: {fileID: 1590754359}
+  - component: {fileID: 1590754360}
   m_Layer: 5
   m_Name: PowerUp
   m_TagString: Untagged
@@ -2917,7 +2918,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -373.9, y: 116.6}
+  m_AnchoredPosition: {x: -375, y: 115}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1590754359
@@ -2938,7 +2939,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 8.67
+  m_Spacing: 8.5
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -2946,6 +2947,23 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1590754360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1590754357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ddf452866ea7747b6b6cc26c5877a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _horizontalLimitText: {fileID: 542802428}
+  _verticalLimitText: {fileID: 337260777}
+  _surroundLimitText: {fileID: 608688115}
+  _crossLimitText: {fileID: 1617703056}
+  _tripleLimitText: {fileID: 288041372}
 --- !u!1 &1617703054
 GameObject:
   m_ObjectHideFlags: 0
@@ -2958,7 +2976,7 @@ GameObject:
   - component: {fileID: 1617703057}
   - component: {fileID: 1617703056}
   m_Layer: 5
-  m_Name: HorizontalLimitText
+  m_Name: CrossLimitText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

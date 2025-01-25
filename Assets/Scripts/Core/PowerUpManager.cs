@@ -38,6 +38,10 @@ public class PowerUpManager : MonoBehaviour
     {
         SceneConfigSO level = message.Level;
         UpdatePowerUpCounts(level);
+        foreach (PowerUpType type in _powerUpCounts.Keys)
+        {
+            EventManager.Publish<OnPowerUpChangedMessage>(new() { PowerUpType = type, CurrentLimit = _powerUpCounts[type].current });
+        }
     }
 
     private void UpdatePowerUpCounts(SceneConfigSO level)
@@ -58,15 +62,16 @@ public class PowerUpManager : MonoBehaviour
             _powerUpCounts[PowerUpType.TRIPLE] = (level.TripleLimit, level.TripleLimit);
     }
 
-    public bool UsePowerUp(PowerUpType powerUpType)
+    public bool UsePowerUp(PowerUpType type)
     {
-        if (_powerUpCounts.ContainsKey(powerUpType))
+        if (_powerUpCounts.ContainsKey(type))
         {
-            (int current, int max) = _powerUpCounts[powerUpType];
+            (int current, int max) = _powerUpCounts[type];
 
             if (current <= 0) return false;
 
-            _powerUpCounts[powerUpType] = (current - 1, max);
+            _powerUpCounts[type] = (current - 1, max);
+            EventManager.Publish<OnPowerUpChangedMessage>(new() { PowerUpType = type, CurrentLimit = _powerUpCounts[type].current });
             return true;
         }
 
