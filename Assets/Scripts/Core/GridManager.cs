@@ -9,6 +9,9 @@ public class GridManager : MonoBehaviour
     public static event Action OnTurnEnd;
     public static event Action OnGameStateChecked;
     public static event Action<OnUsePowerUpEvent> OnUsePowerUp;
+    public AudioClip popClip;
+    public AudioClip powerUpClip;
+    public AudioClip powerUpUseClip;
     public class OnUsePowerUpEvent
     {
         public PowerUpType powerUp;
@@ -235,6 +238,10 @@ public class GridManager : MonoBehaviour
     public void PowerUpBasic(GridTileBase bubbleToPop)
     {
         bubbleToPop.StartPop();
+        if (popClip != null)
+        {
+            AudioSource.PlayClipAtPoint(popClip, transform.position);
+        }
 
         // RemoveGrid(bubbleToPop);
         OnTurnEnd?.Invoke();
@@ -263,6 +270,11 @@ public class GridManager : MonoBehaviour
             //     // bubbleTiles.Remove(bubbleToPop);
             //     // RemoveGrid(bubbleToPop);
             // }
+        }
+
+        if (powerUpUseClip != null)
+        {
+            AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
         }
 
         OnUpdateGrid?.Invoke();
@@ -294,6 +306,12 @@ public class GridManager : MonoBehaviour
             // }
         }
 
+        if (powerUpUseClip != null)
+        {
+            AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        }
+
+
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
         CheckGameState();
@@ -305,6 +323,10 @@ public class GridManager : MonoBehaviour
         {
             _tripleRemain--;
             bubbleToPop?.StartPop();
+            if (powerUpUseClip != null)
+            {
+                AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+            }
             // bubbleTiles.Remove(tile);
             // RemoveGrid(tile);
             // OnUpdateGrid?.Invoke();
@@ -361,6 +383,11 @@ public class GridManager : MonoBehaviour
             // }
         }
 
+        if (powerUpUseClip != null)
+        {
+            AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
+        }
+
         OnUpdateGrid?.Invoke();
         OnTurnEnd?.Invoke();
         CheckGameState();
@@ -393,6 +420,11 @@ public class GridManager : MonoBehaviour
                     // }
                 }
             }
+        }
+
+        if (powerUpUseClip != null)
+        {
+            AudioSource.PlayClipAtPoint(powerUpUseClip, transform.position);
         }
 
         OnUpdateGrid?.Invoke();
