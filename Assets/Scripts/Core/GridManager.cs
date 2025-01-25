@@ -98,7 +98,7 @@ public class GridManager : MonoBehaviour
         {
             case PowerUpType.BASIC:
                 PowerUpBasic(bubble);
-                EventManager.Publish<OnBubblePoppedMessage>(new() { BubblePosition = transform.position });
+                EventManager.Publish<OnBubblePoppedMessage>(new() { BubblePosition = bubble.transform.position });
                 break;
             case PowerUpType.VERTICAL:
                 PowerUpVerticalLine(bubble);
