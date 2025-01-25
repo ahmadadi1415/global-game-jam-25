@@ -324,6 +324,7 @@ public class GridManager : MonoBehaviour
 
         if (_tripleRemain <= 0)
         {
+            _tripleRemain = 3;
             OnTurnEnd?.Invoke();
             CheckGameState();
         };
