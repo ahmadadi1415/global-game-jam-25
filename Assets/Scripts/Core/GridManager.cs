@@ -22,7 +22,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private int height = 5; // Number of rows
     [SerializeField] private int width = 5; // Number of columns
     [SerializeField] private Vector2 gridOffset = Vector2.zero;
-    [SerializeField] private List<Vector2Int> holes = new();
+    [SerializeField] private List<Vector2Int> bubbles = new();
     [SerializeField] private Vector2 _cellSize;
 
     private bool _requiresGeneration = true;
@@ -151,7 +151,7 @@ public class GridManager : MonoBehaviour
         List<Vector3Int> coordinates = new();
         width = level.Width;
         height = level.Height;
-        holes = level.Holes;
+        bubbles = level.Bubbles;
 
         for (int y = 0; y < height; y++)
         {
@@ -171,13 +171,13 @@ public class GridManager : MonoBehaviour
 
         foreach (Vector3Int coord in coordinates)
         {
-            bool isPopped = holes.Contains((Vector2Int)coord);
+            bool isBubble = bubbles.Contains((Vector2Int)coord);
 
             Vector3 position = _grid.GetCellCenterWorld(coord);
 
             GridTileBase spawnedBubble = Instantiate(bubblePrefab, position, Quaternion.identity, transform);
 
-            spawnedBubble.Init(coord, isPopped ? BubbleState.POPPED : BubbleState.UNPOPPED, gridOffset);
+            spawnedBubble.Init(coord, isBubble ? BubbleState.UNPOPPED : BubbleState.POPPED, gridOffset);
 
             bubbleTiles.Add(spawnedBubble);
             bound.Encapsulate(position);

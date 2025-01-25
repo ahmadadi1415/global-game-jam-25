@@ -2302,7 +2302,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 91fa545d8ab9007419a5b39cdb0cb60a, type: 2}
   - {fileID: 11400000, guid: 880117efd3e83c24e83a597ac25dda3e, type: 2}
   - {fileID: 11400000, guid: 7a2dddadac472c949a50b7629fd01f97, type: 2}
-  currentLevelIndex: 0
+  currentLevelIndex: 6
 --- !u!4 &825708472
 Transform:
   m_ObjectHideFlags: 0
@@ -3540,7 +3540,7 @@ MonoBehaviour:
   height: 5
   width: 5
   gridOffset: {x: -5, y: 0.5}
-  holes: []
+  bubbles: []
   _cellSize: {x: 5, y: 5}
 --- !u!4 &2084251873
 Transform:

@@ -18,5 +18,5 @@ public class SceneConfigSO : ScriptableObject
     public int Width;
     public int Height;
     [Tooltip("Hole started from 0 in cartesian coordinates.")]
-    public List<Vector2Int> Holes = new();
+    public List<Vector2Int> Bubbles = new();
 }
