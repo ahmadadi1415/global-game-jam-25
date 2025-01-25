@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     {
         _currentTurns = level.MaxTurns;
         _maxTurns = level.MaxTurns;
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
     }
 
     private void OnEnable()
@@ -134,6 +135,7 @@ public class GameManager : MonoBehaviour
         _currentTurns--;
         _powerUpManager.UsePowerUp(powerUp);
         SetPowerUp(PowerUpType.BASIC);
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
     }
 
     private void Instance_OnUpdateGrid()

@@ -304,7 +304,7 @@ public class GridManager : MonoBehaviour
         if (_tripleRemain > 0)
         {
             _tripleRemain--;
-            bubbleToPop?.StartPop();
+            bubbleToPop.StartPop();
             // bubbleTiles.Remove(tile);
             // RemoveGrid(tile);
             // OnUpdateGrid?.Invoke();
@@ -316,6 +316,7 @@ public class GridManager : MonoBehaviour
         {
             OnTurnEnd?.Invoke();
             CheckGameState();
+            _tripleRemain = 3;
         };
     }
 
