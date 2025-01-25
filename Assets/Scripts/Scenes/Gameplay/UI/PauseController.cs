@@ -25,6 +25,7 @@ public class PauseController : MonoBehaviour
         quitButton.onClick.AddListener(() =>
         {
             // ini kemana? home?
+            EventManager.Publish<OnPlayStateChangedMessage>(new() { IsPlaying = true });
             SceneManager.LoadScene("MainMenu");
         });
     }
