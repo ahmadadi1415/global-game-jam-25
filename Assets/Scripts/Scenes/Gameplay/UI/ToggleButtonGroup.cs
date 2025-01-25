@@ -15,6 +15,7 @@ public class ToggleButtonGroup : MonoBehaviour
         {
             // Add a listener to each button
             button.onClick.AddListener(() => OnButtonClicked(button));
+            button.onClick.AddListener(() => UIAnimation.Pop(button.gameObject));
             DeselectButton(button);
         }
     }
