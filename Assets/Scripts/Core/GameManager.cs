@@ -1,63 +1,202 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+
+public enum GameState { PLAYING, LOSE, WIN };
+public enum PowerUpType { BASIC, VERTICAL, HORIZONTAL, CROSS, SURROUND, TRIPLE };
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    public int maxTurns = 20; // Maximum number of turns
-    public Text turnsText; // UI Text to display remaining turns
-    public Text statusText; // UI Text to display game status
-    private int currentTurns;
-    private int totalBubbles;
+    public static event Action OnLoseGame;
+    public static event Action OnWinGame;
+
+    public PowerUpType powerUp;
+    public GameState gameState;
+
+    public SceneConfigSO sceneConfig;
+    private SceneConfigSO _currentSceneConfigSO;
+
+    [SerializeField] private int _currentTurns = 0;
+    [SerializeField] private int _maxTurns = 0;
+
+    [SerializeField] private GridManager _gridManager;
+    [SerializeField] private PowerUpManager _powerUpManager;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
+
+        // if (sceneConfig == null)
+        // {
+        //     Debug.LogError("Please add Scene Config Scriptable Object To Game Manager");
+        // }
+        // else
+        // {
+        //     if (sceneConfig != null)
+        //     {
+        //         _currentSceneConfigSO = sceneConfig;
+        //         UpdateGameData(_currentSceneConfigSO);
+        //     }
+        // }
     }
 
-    private void Start()
+    private void UpdateGameData(SceneConfigSO level)
     {
-        currentTurns = maxTurns;
-        totalBubbles = FindObjectsOfType<Bubble>().Length; // Count all bubbles in the scene
-        UpdateUI();
+        _currentTurns = level.MaxTurns;
+        _maxTurns = level.MaxTurns;
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
     }
 
-    public void BubbleDestroyed()
+    private void OnEnable()
     {
-        totalBubbles--;
-        currentTurns--;
-        CheckGameStatus();
-        UpdateUI();
+        EventManager.Subscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
+        EventManager.Subscribe<OnLevelLoadedMessage>(OnLevelLoaded);
+        // GridManager.OnUpdateGrid += Instance_OnUpdateGrid;
+        GridManager.OnTurnEnd += Instance_OnTurnEnd;
+        GridManager.OnUsePowerUp += Instance_OnUsePowerUp;
+        // GridTileBase.OnGridClick += GridTileBase_OnGridClick;
+        // OnWinGame += GameManager_OnWinGame;
+        // OnLoseGame += GameManager_OnLoseGame;
     }
 
-    void CheckGameStatus()
+    private void OnDisable()
     {
-        if (totalBubbles == 0)
+        EventManager.Unsubscribe<OnBubblesCheckedMessage>(OnBubblesChecked);
+        EventManager.Unsubscribe<OnLevelLoadedMessage>(OnLevelLoaded);
+        // GridManager.OnUpdateGrid -= Instance_OnUpdateGrid;
+        GridManager.OnTurnEnd -= Instance_OnTurnEnd;
+        GridManager.OnUsePowerUp -= Instance_OnUsePowerUp;
+        // GridTileBase.OnGridClick -= GridTileBase_OnGridClick;
+        // OnWinGame -= GameManager_OnWinGame;
+        // OnLoseGame -= GameManager_OnLoseGame;
+    }
+
+    private void OnLevelLoaded(OnLevelLoadedMessage message)
+    {
+        gameState = GameState.PLAYING;
+        UpdateGameData(message.Level);
+    }
+
+    private void OnBubblesChecked(OnBubblesCheckedMessage message)
+    {
+        if (message.IsAllPopped && _currentTurns >= 0)
         {
-            statusText.text = "You Win!";
-            EndGame();
+            StartCoroutine(HandleWinState());
         }
-        else if (currentTurns <= 0)
+        else if (!message.IsAllPopped && _currentTurns == 0)
         {
-            statusText.text = "You Lose!";
-            EndGame();
+            StartCoroutine(HandleLoseState(message.IsAllPopped));
+        }
+        else
+        {
+            gameState = GameState.PLAYING;
         }
     }
 
-    void UpdateUI()
+    private IEnumerator HandleWinState()
     {
-        turnsText.text = $"Turns: {currentTurns}";
+        yield return new WaitForSeconds(1.0f);
+        gameState = GameState.WIN;
+        Debug.Log("Game win");
+
+        EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = true });
     }
 
-    void EndGame()
+    private IEnumerator HandleLoseState(bool isAllPopped)
     {
-        // Disable all bubbles
-        foreach (var bubble in FindObjectsOfType<Bubble>())
+        Debug.Log($"Is all popped: {isAllPopped}, {_currentTurns}");
+        yield return new WaitForSeconds(1.0f);
+        gameState = GameState.LOSE;
+        Debug.Log("Game lose");
+
+        EventManager.Publish<OnLevelFinishedMessage>(new() { IsWin = false });
+    }
+
+
+    private void Instance_OnUsePowerUp(GridManager.OnUsePowerUpEvent obj)
+    {
+        // set based on ui later
+    }
+
+    private void GameManager_OnLoseGame()
+    {
+        Debug.Log("Lose");
+    }
+
+    private void GameManager_OnWinGame()
+    {
+        Debug.Log("Winner");
+    }
+
+    private void GridTileBase_OnGridClick(GridTileBase.OnGridClickEvent obj)
+    {
+        if (_currentTurns == 1 && GridManager.Instance.bubbleTiles.Count > 0)
         {
-            bubble.enabled = false;
+            OnLoseGame?.Invoke();
         }
+
+        if (_currentTurns >= 1 && GridManager.Instance.bubbleTiles.Count == 0)
+        {
+            OnWinGame?.Invoke();
+        }
+    }
+
+    private void Instance_OnTurnEnd()
+    {
+        _currentTurns--;
+        _powerUpManager.UsePowerUp(powerUp);
+        SetPowerUp(PowerUpType.BASIC);
+        EventManager.Publish<OnTurnChangedMessage>(new() { CurrentTurn = _currentTurns });
+    }
+
+    private void Instance_OnUpdateGrid()
+    {
+        Debug.Log("Grid updated");
+    }
+
+    public void SetPowerUp(PowerUpType powerUp)
+    {
+        if (powerUp == PowerUpType.BASIC)
+        {
+            this.powerUp = powerUp;
+            return;
+        }
+
+        if (_powerUpManager.CanUsePowerUp(powerUp))
+        {
+            this.powerUp = powerUp;
+        }
+        else
+        {
+            Debug.Log($"Cant use this power up: {powerUp}");
+            this.powerUp = PowerUpType.BASIC;
+        }
+    }
+
+    public PowerUpType GetPowerUp()
+    {
+        return powerUp;
+    }
+
+    public void SetGameState(GameState gameState)
+    {
+        this.gameState = gameState;
+    }
+
+    public GameState GetGameState()
+    {
+        return gameState;
+    }
+
+    public int GetTurnRemain()
+    {
+        return _currentTurns;
+    }
+
+    public SceneConfigSO GetSceneConfigSO()
+    {
+        return _currentSceneConfigSO;
     }
 }
 
